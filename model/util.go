@@ -2,10 +2,9 @@ package model
 
 import (
 	"math"
-	"math/rand"
 )
 
-// getConnDist assigns the probabilities of having 0, 1, ..., n neighbors for a site
+// GetConnDist assigns the probabilities of having 0, 1, ..., n neighbors for a site
 // use Poisson distribution P(k) = exp(-lambda) * lambda^k / factorial(k)
 func GetConnDist(lambda float64, kmax int64) []float64 {
 	probs := make([]float64, kmax+1)
@@ -21,22 +20,22 @@ func GetConnDist(lambda float64, kmax int64) []float64 {
 	}
 
 	// normalize probabilities within range 0 - kmax
-	for k, _ := range probs {
+	for k := range probs {
 		probs[k] = probs[k] / tot
 	}
 
 	return probs
 }
 
-// assignConn assigns a site how many neighbors it has based on the probability distribution
-func AssignConn(ps []float64) (int, bool) {
-	r := rand.Float64()
+// AssignConn assigns a site how many neighbors it has based on the probability distribution
+func AssignConn(ps []float64, r float64) int {
 	var ptot float64
 	for k, p := range ps {
 		ptot = ptot + p
 		if ptot > r {
-			return k, true
+			return k
 		}
 	}
-	return 0, false
+	// probs in ps don't cover r
+	return -1
 }

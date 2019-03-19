@@ -56,8 +56,8 @@ func initState(n int64, ps []float64) state {
 
 	for i := int64(0); i < n; i++ {
 		locs[i] = location{x: rand.Float64(), y: rand.Float64()}
-		c, ok := AssignConn(ps)
-		if !ok {
+		c := AssignConn(ps, rand.Float64())
+		if c < 0 {
 			return state{}
 		}
 		conns[i] = c
