@@ -1,4 +1,4 @@
-package main
+package model
 
 import (
 	"fmt"
@@ -24,9 +24,9 @@ type state struct {
 // t = temperature
 // n = num of sites
 // m = max num of iterations
-func evolve(t float64, n int64, m int64, cmean float64, cmax float64) (state, []float64) {
+func evolve(t float64, n int64, m int64, cmean float64, cmax int64) (state, []float64) {
 	// build connectivity distribution
-	ps := getConnDist(cmean, cmax)
+	ps := GetConnDist(cmean, cmax)
 
 	// build initial state
 	s := initState(n, ps)
@@ -56,7 +56,7 @@ func initState(n int64, ps []float64) state {
 
 	for i := int64(0); i < n; i++ {
 		locs[i] = location{x: rand.Float64(), y: rand.Float64()}
-		c, ok := assignConn(ps)
+		c, ok := AssignConn(ps)
 		if !ok {
 			return state{}
 		}
