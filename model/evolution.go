@@ -6,15 +6,15 @@ import (
 	"math/rand"
 )
 
-// the location of a site
-type location struct {
+// Location of a site
+type Location struct {
 	x float64
 	y float64
 }
 
-// the state of the system
-type state struct {
-	locations     []location
+// State stores the state of the system
+type State struct {
+	locations     []Location
 	connections   []int
 	spins         []int
 	magnetization float64
@@ -24,7 +24,7 @@ type state struct {
 // t = temperature
 // n = num of sites
 // m = max num of iterations
-func evolve(t float64, n int64, m int64, cmean float64, cmax int64) (state, []float64) {
+func evolve(t float64, n int64, m int64, cmean float64, cmax int64) (State, []float64) {
 	// build connectivity distribution
 	ps := GetConnDist(cmean, cmax)
 
@@ -34,7 +34,7 @@ func evolve(t float64, n int64, m int64, cmean float64, cmax int64) (state, []fl
 	// evolve state
 	var magHistory []float64
 	for i := int64(0); i < m; i++ {
-		s = iterate(s, t)
+		s = Iterate(s, t)
 		magHistory = append(magHistory, s.magnetization)
 		// if ferromagnetic, stop and return
 		if math.Abs(s.magnetization) == 1.0 {
@@ -49,23 +49,23 @@ func evolve(t float64, n int64, m int64, cmean float64, cmax int64) (state, []fl
 }
 
 // initState creates a random initial state
-func initState(n int64, ps []float64) state {
-	var locs []location
+func initState(n int64, ps []float64) State {
+	var locs []Location
 	var conns, sps []int
 	var mag int64
 
 	for i := int64(0); i < n; i++ {
-		locs[i] = location{x: rand.Float64(), y: rand.Float64()}
+		locs[i] = Location{x: rand.Float64(), y: rand.Float64()}
 		c := AssignConn(ps, rand.Float64())
 		if c < 0 {
-			return state{}
+			return State{}
 		}
 		conns[i] = c
 		sps[i] = rand.Intn(2)*2 - 1
 		mag = mag + int64(sps[i])
 	}
 
-	return state{
+	return State{
 		locations:     locs,
 		spins:         sps,
 		magnetization: float64(mag) / float64(n),
