@@ -6,8 +6,8 @@ import (
 )
 
 // Global constants
-const lenEvol = 100
-const numSites = 10
+const lenEvol = 50000
+const numSites = 400
 const meanConns = 4
 const maxConns = 8
 const forceConns = true

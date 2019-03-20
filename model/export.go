@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/csv"
 	"log"
+	"math"
 	"os"
 	"strconv"
 )
@@ -19,13 +20,15 @@ func exportMagHist(hist []Situation) {
 	defer writer.Flush()
 
 	for time, situ := range hist {
-		row := []string{
-			strconv.Itoa(time),
-			situ.action,
-			strconv.FormatFloat(situ.mag, 'g', 5, 64)}
-		err := writer.Write(row)
-		if err != nil {
-			log.Fatal("Cannot write to file", err)
+		if math.Mod(float64(time), 100.0) == 0.0 {
+			row := []string{
+				strconv.Itoa(time),
+				situ.action,
+				strconv.FormatFloat(situ.mag, 'g', 5, 64)}
+			err := writer.Write(row)
+			if err != nil {
+				log.Fatal("Cannot write to file", err)
+			}
 		}
 	}
 
