@@ -1,6 +1,7 @@
 package model
 
 import (
+	"fmt"
 	"math"
 	"math/rand"
 	"sort"
@@ -25,6 +26,7 @@ func Iterate(s State, t float64) State {
 	neighborIDs := GetNeighbors(distances, siteID, siteConns)
 
 	currentE := GetEnergy(siteSpin, neighborIDs, s.spins)
+	fmt.Printf("current energy = %f", currentE)
 
 	return s
 }
