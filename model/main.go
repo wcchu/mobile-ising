@@ -1,4 +1,4 @@
-package model
+package main
 
 import (
 	"math/rand"
@@ -6,10 +6,11 @@ import (
 )
 
 // Global constants
-const maxEvoTime = 10000
-const numSites = 100
-const meanConns = 4
-const maxConns = 10
+const maxEvoTime = 1
+const numSites = 5
+const meanConns = 1
+const maxConns = 2
+const forceConns = true
 
 // main
 func main() {

@@ -1,4 +1,4 @@
-package model_test
+package main_test
 
 import (
 	"math"
@@ -8,7 +8,6 @@ import (
 	model "github.com/wcchu/mobile-ising/model"
 )
 
-//
 func TestTwoArrs(t *testing.T) {
 	tests :=
 		[]struct {
@@ -34,7 +33,6 @@ func TestTwoArrs(t *testing.T) {
 	}
 }
 
-// TestGetDist tests the GetDist functions.
 func TestGetConnDist(t *testing.T) {
 	tests := []struct {
 		lambda float64
@@ -58,7 +56,6 @@ func TestGetConnDist(t *testing.T) {
 	}
 }
 
-//
 func TestAssignConn(t *testing.T) {
 	tests := []struct {
 		probs []float64

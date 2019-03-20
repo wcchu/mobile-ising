@@ -1,9 +1,10 @@
-package model
+package main
 
 import (
 	"math"
 )
 
+// TwoArrs is for sorting indexed values by values
 type TwoArrs struct {
 	IDs  []int
 	Vals []float64
@@ -32,7 +33,13 @@ func GetConnDist(lambda float64, kmax int64) []float64 {
 		tot = tot + probs[k]
 	}
 
-	// normalize probabilities within range 0 - kmax
+	// if forceConns, do not allow having 0 connection
+	if forceConns {
+		tot = tot - probs[0]
+		probs[0] = 0
+	}
+
+	// normalize probabilities
 	for k := range probs {
 		probs[k] = probs[k] / tot
 	}

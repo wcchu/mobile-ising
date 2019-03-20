@@ -1,4 +1,4 @@
-package model_test
+package main_test
 
 import (
 	"testing"
@@ -6,7 +6,6 @@ import (
 	model "github.com/wcchu/mobile-ising/model"
 )
 
-//
 func TestGetEnergy(t *testing.T) {
 	tests :=
 		[]struct {
