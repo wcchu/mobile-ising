@@ -7,11 +7,6 @@ import (
 	"sort"
 )
 
-type twoArrs struct {
-	ids  []int
-	vals []float64
-}
-
 // Iterate moves the state forward by one step
 // s = current state
 // t = temperature
@@ -44,15 +39,8 @@ func GetNeighbors(ds []float64, c int) []int {
 	}
 
 	// sort by value instead of index using Interface
-	sort.Sort(twoArrs{ids: ids, vals: vals})
+	sort.Sort(TwoArrs{IDs: ids, Vals: vals})
 
 	// exclude the first one which is the site itself (distance = 0)
 	return ids[1 : c+1]
-}
-
-func (x twoArrs) Len() int           { return len(x.ids) }
-func (x twoArrs) Less(i, j int) bool { return x.vals[i] < x.vals[j] }
-func (x twoArrs) Swap(i, j int) {
-	x.ids[i], x.ids[j] = x.ids[j], x.ids[i]
-	x.vals[i], x.vals[j] = x.vals[j], x.vals[i]
 }

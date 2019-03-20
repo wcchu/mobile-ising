@@ -4,6 +4,19 @@ import (
 	"math"
 )
 
+type TwoArrs struct {
+	IDs  []int
+	Vals []float64
+}
+
+// Sort by value when sorting TwoArrs structure
+func (x TwoArrs) Len() int           { return len(x.IDs) }
+func (x TwoArrs) Less(i, j int) bool { return x.Vals[i] < x.Vals[j] }
+func (x TwoArrs) Swap(i, j int) {
+	x.IDs[i], x.IDs[j] = x.IDs[j], x.IDs[i]
+	x.Vals[i], x.Vals[j] = x.Vals[j], x.Vals[i]
+}
+
 // GetConnDist assigns the probabilities of having 0, 1, ..., n neighbors for a site
 // use Poisson distribution P(k) = exp(-lambda) * lambda^k / factorial(k)
 func GetConnDist(lambda float64, kmax int64) []float64 {
