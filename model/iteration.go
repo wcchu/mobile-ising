@@ -1,7 +1,6 @@
 package model
 
 import (
-	"fmt"
 	"math"
 	"math/rand"
 	"sort"
@@ -23,13 +22,16 @@ func Iterate(s State, t float64) State {
 	for id, loc := range s.locations {
 		distances[id] = math.Sqrt(math.Pow(siteLoc.x-loc.x, 2) + math.Pow(siteLoc.y-loc.y, 2))
 	}
-	neighborIDs := GetNeighbors(distances, siteConns)
-	fmt.Printf("neighbors = %v", neighborIDs)
+	neighborIDs := GetNeighbors(distances, siteID, siteConns)
+
 	return s
 }
 
-// GetNeighbors returns c indices that have shortest (and > 0) distances
-func GetNeighbors(ds []float64, c int) []int {
+// GetNeighbors returns nc indices that have shortest (and > 0) distances
+// ds = array of distances from the site ordered by site ids
+// id0 = the id of the operational site
+// nc = num of connections
+func GetNeighbors(ds []float64, id0 int, nc int) []int {
 	// convert indices of ds to an array
 	ids := make([]int, len(ds))
 	vals := make([]float64, len(ds))
@@ -41,6 +43,17 @@ func GetNeighbors(ds []float64, c int) []int {
 	// sort by value instead of index using Interface
 	sort.Sort(TwoArrs{IDs: ids, Vals: vals})
 
-	// exclude the first one which is the site itself (distance = 0)
-	return ids[1 : c+1]
+	// collect neighbors
+	var neighbors []int
+	for _, id := range ids {
+		// skip the operational site itself
+		if id != id0 {
+			neighbors = append(neighbors, id)
+		}
+		// return when there are enough neighbors
+		if len(neighbors) == nc {
+			return neighbors
+		}
+	}
+	return []int{}
 }
