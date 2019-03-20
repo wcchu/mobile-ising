@@ -37,17 +37,25 @@ func TestGetConnDist(t *testing.T) {
 	tests := []struct {
 		lambda float64
 		kmax   int64
+		force  bool
 		probs  []float64
 	}{
 		{
 			lambda: 1.0,
 			kmax:   5,
+			force:  false,
 			probs:  []float64{0.368098, 0.368098, 0.184049, 0.061350, 0.015337, 0.003067},
+		},
+		{
+			lambda: 1.0,
+			kmax:   5,
+			force:  true,
+			probs:  []float64{0.0, 0.582524, 0.291262, 0.097087, 0.024272, 0.004854},
 		},
 	}
 
 	for _, tt := range tests {
-		preds := model.GetConnDist(tt.lambda, tt.kmax)
+		preds := model.GetConnDist(tt.lambda, tt.kmax, tt.force)
 		for k, v := range tt.probs {
 			if math.Abs(preds[k]-v) > 1e-5 {
 				t.Errorf("k = %d, expected %f, got %f", k, v, preds[k])

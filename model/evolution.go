@@ -25,7 +25,7 @@ type State struct {
 // L = max num of iterations
 func evolve(T float64, N int64, L int64, cmean float64, cmax int64) (State, []float64) {
 	// build connectivity distribution
-	ps := GetConnDist(cmean, cmax)
+	ps := GetConnDist(cmean, cmax, forceConns)
 
 	// build initial state
 	s := initState(N, ps)
