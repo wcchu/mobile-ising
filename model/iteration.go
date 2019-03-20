@@ -13,10 +13,16 @@ type siteInfo struct {
 	spin  int
 }
 
+// Situation is the summary of one iteration
+type Situation struct {
+	action string
+	mag    float64
+}
+
 // Iterate moves the state forward by one step
 // s = current state
 // T = temperature
-func Iterate(st State, T float64) State {
+func Iterate(st State, T float64) (State, Situation) {
 	// choose the operational site
 	N := len(st.locations)
 	id := rand.Intn(N)
@@ -25,6 +31,10 @@ func Iterate(st State, T float64) State {
 		loc:   st.locations[id],
 		conns: st.connections[id],
 		spin:  st.spins[id],
+	}
+	situ := Situation{
+		action: "none",
+		mag:    getMag(st.spins),
 	}
 
 	// get neighbors from current operational site
@@ -40,9 +50,10 @@ func Iterate(st State, T float64) State {
 		dE := flippedE - currE
 		if dE < 0 || rand.Float64() < math.Exp(-dE/T) {
 			st.spins[id] = -site.spin
-			return st
+			situ.action = "flip"
+			situ.mag = getMag(st.spins)
 		}
-	} else { // try moving site but keeping spin
+	} else { // try moving site but keeping spin; in this case magnetization doesn't change
 		candSite := siteInfo{
 			id:    id,
 			loc:   Location{x: rand.Float64(), y: rand.Float64()}, // random candidate location
@@ -55,11 +66,11 @@ func Iterate(st State, T float64) State {
 		dE := candE - currE
 		if dE < 0 || rand.Float64() < math.Exp(-dE/T) {
 			st.locations[id] = candSite.loc
-			return st
+			situ.action = "move"
 		}
 	}
-	// if neither action is taken, return original state
-	return st
+	// if neither action is taken, state and situation stay the same
+	return st, situ
 }
 
 // GetNeighbors returns nc indices that have shortest (and > 0) distances
@@ -113,4 +124,14 @@ func GetEnergy(s0 int, ns, ss []int) float64 {
 	}
 
 	return K * float64(sum)
+}
+
+// getMag calculates the magnetization for given spins of a state
+func getMag(sps []int) float64 {
+	N := len(sps)
+	sum := 0
+	for _, s := range sps {
+		sum = sum + s
+	}
+	return float64(sum) / float64(N)
 }
