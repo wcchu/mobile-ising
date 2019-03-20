@@ -15,7 +15,7 @@ func Iterate(s State, t float64) State {
 	siteID := rand.Intn(numSites)
 	siteLoc := s.locations[siteID]
 	siteConns := s.connections[siteID]
-	//siteSpin := s.spins[siteID]
+	siteSpin := s.spins[siteID]
 
 	// get distances from operational site to each site (including itself)
 	distances := make([]float64, numSites)
@@ -23,6 +23,8 @@ func Iterate(s State, t float64) State {
 		distances[id] = math.Sqrt(math.Pow(siteLoc.x-loc.x, 2) + math.Pow(siteLoc.y-loc.y, 2))
 	}
 	neighborIDs := GetNeighbors(distances, siteID, siteConns)
+
+	currentE := GetEnergy(siteSpin, neighborIDs, s.spins)
 
 	return s
 }
@@ -56,4 +58,21 @@ func GetNeighbors(ds []float64, id0 int, nc int) []int {
 		}
 	}
 	return []int{}
+}
+
+// GetEnergy calculates the energy for H_i = -K sum(S_i * S_j)
+// s0 = the spin of operational site
+// ns = the ids of the neighbor sites
+// ss = the list of spins of the whole system
+func GetEnergy(s0 int, ns, ss []int) float64 {
+	// set K to -1 for simplicity
+	var K float64 = -1
+
+	// calculate the summation part
+	sum := int(0)
+	for _, id := range ns {
+		sum = sum + s0*ss[id]
+	}
+
+	return K * float64(sum)
 }
