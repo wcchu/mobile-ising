@@ -36,7 +36,7 @@ func TestTwoArrs(t *testing.T) {
 func TestGetConnDist(t *testing.T) {
 	tests := []struct {
 		lambda float64
-		kmax   int64
+		kmax   int
 		force  bool
 		probs  []float64
 	}{

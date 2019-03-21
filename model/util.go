@@ -20,7 +20,7 @@ func (x TwoArrs) Swap(i, j int) {
 
 // GetConnDist assigns the probabilities of having 0, 1, ..., n neighbors for a site
 // use Poisson distribution P(k) = exp(-lambda) * lambda^k / factorial(k)
-func GetConnDist(lambda float64, kmax int64, force bool) []float64 {
+func GetConnDist(lambda float64, kmax int, force bool) []float64 {
 	probs := make([]float64, kmax+1)
 
 	// the 1st term (k = 0) is only exp(-lambda)
@@ -28,7 +28,7 @@ func GetConnDist(lambda float64, kmax int64, force bool) []float64 {
 
 	// Poisson distribution up to kmax
 	tot := probs[0]
-	for k := int64(1); k <= kmax; k++ {
+	for k := 1; k <= kmax; k++ {
 		probs[k] = probs[k-1] * lambda / float64(k)
 		tot = tot + probs[k]
 	}

@@ -24,7 +24,7 @@ type State struct {
 // T = temperature
 // N = num of sites
 // L = max num of iterations
-func evolve(T float64, N int64, L int64, cmean float64, cmax int64) ([]State, []Situation) {
+func evolve(T float64, N, L int, cmean float64, cmax int) ([]State, []Situation) {
 	// build connectivity distribution
 	ps := GetConnDist(cmean, cmax, forceConns)
 
@@ -38,8 +38,8 @@ func evolve(T float64, N int64, L int64, cmean float64, cmax int64) ([]State, []
 	situHist = append(situHist, situ)
 
 	// evolve state
-	bar := pb.StartNew(int(L))
-	for i := int64(1); i <= L; i++ {
+	bar := pb.StartNew(L)
+	for i := 1; i <= L; i++ {
 		bar.Increment()
 		//time.Sleep(time.Millisecond)
 		st, situ = Iterate(st, T)
@@ -59,12 +59,12 @@ func evolve(T float64, N int64, L int64, cmean float64, cmax int64) ([]State, []
 // initState creates a random initial state
 // N = num of sites
 // ps = prob distribution of having k connections
-func initState(N int64, ps []float64) State {
+func initState(N int, ps []float64) State {
 	locs := make([]Location, N)
 	conns := make([]int, N)
 	sps := make([]int, N)
 
-	for i := int64(0); i < N; i++ {
+	for i := 0; i < N; i++ {
 		locs[i] = Location{X: rand.Float64(), Y: rand.Float64()}
 		c := AssignConn(ps, rand.Float64())
 		if c < 0 {
