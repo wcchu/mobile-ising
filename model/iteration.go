@@ -14,19 +14,26 @@ type siteInfo struct {
 }
 
 // Iterate moves the state forward by one step
-// s = current state
-// T = temperature
-func Iterate(st State, T float64) (State, float64) {
+// inputs: u = input state, T = temperature
+// outputs: output state, output magnetization
+func Iterate(stInp State, T float64) (State, float64) {
+	// prepare state and mag before iteration
+	st := stInp
+	st.Locations = make([]Location, len(stInp.Locations))
+	st.Spins = make([]int, len(stInp.Spins))
+	copy(st.Locations, stInp.Locations)
+	copy(st.Spins, stInp.Spins)
+
+	mag := GetMag(st.Spins)
+
 	// choose the operational site
-	N := len(st.Locations)
-	id := rand.Intn(N)
+	id := rand.Intn(len(st.Locations))
 	site := siteInfo{
 		id:    id,
 		loc:   st.Locations[id],
 		conns: st.Connections[id],
 		spin:  st.Spins[id],
 	}
-	mag := GetMag(st.Spins)
 
 	// get neighbors from current operational site
 	currNeighbors := GetNeighbors(site, st.Locations)
@@ -47,8 +54,8 @@ func Iterate(st State, T float64) (State, float64) {
 		candSite := siteInfo{
 			id:    id,
 			loc:   Location{X: rand.Float64(), Y: rand.Float64()}, // random candidate location
-			conns: st.Connections[id],
-			spin:  st.Spins[id],
+			conns: site.conns,
+			spin:  site.spin,
 		}
 		candNeighbors := GetNeighbors(candSite, st.Locations)
 		candE := GetEnergy(site.spin, candNeighbors, st.Spins)
