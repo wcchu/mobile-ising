@@ -24,35 +24,35 @@ type State struct {
 // T = temperature
 // N = num of sites
 // L = max num of iterations
-func evolve(T float64, N, L int, cmean float64, cmax int) ([]State, []Situation) {
+func evolve(T float64, N, L int, cmean float64, cmax int) ([]State, []float64) {
 	// build connectivity distribution
 	ps := GetConnDist(cmean, cmax, forceConns)
 
-	// build initial state/situation
+	// build initial state/magnetization
 	st := initState(N, ps)
-	situ := Situation{Action: "init", Mag: GetMag(st.Spins)}
+	mag := GetMag(st.Spins)
 	// initial history
 	var stateHist []State
-	var situHist []Situation
+	var magHist []float64
 	stateHist = append(stateHist, st)
-	situHist = append(situHist, situ)
+	magHist = append(magHist, mag)
 
 	// evolve state
 	bar := pb.StartNew(L)
 	for i := 1; i <= L; i++ {
 		bar.Increment()
-		st, situ = Iterate(st, T)
+		st, mag = Iterate(st, T)
 		stateHist = append(stateHist, st)
-		situHist = append(situHist, situ)
+		magHist = append(magHist, mag)
 		// if ferromagnetic, stop and return
-		if math.Abs(situ.Mag) == 1.0 {
-			return stateHist, situHist
+		if math.Abs(mag) == 1.0 {
+			return stateHist, magHist
 		}
 	}
 	bar.FinishPrint("evolution done")
 
 	// max num of iterations reached, return
-	return stateHist, situHist
+	return stateHist, magHist
 }
 
 // initState creates a random initial state

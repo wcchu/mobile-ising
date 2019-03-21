@@ -22,13 +22,15 @@ func exportStateHist(h []State, k int) {
 	defer writer.Flush()
 
 	writer.Write([]string{"time", "site", "x", "y", "conns", "spin"})
+	n := len(h[0].Spins)
 	bar := pb.StartNew(len(h))
-	for time, state := range h { // loop over times
+	for i, state := range h { // loop over times
 		bar.Increment()
-		if math.Mod(float64(time), float64(k)) == 0.0 {
+		if math.Mod(float64(i), float64(k)) == 0.0 {
 			for id, loc := range state.Locations { // loop over sites
 				row := []string{
-					strconv.Itoa(time),
+					// time is normalized by number of sites
+					strconv.FormatFloat(float64(i)/float64(n), 'g', 5, 64),
 					strconv.Itoa(id),
 					strconv.FormatFloat(loc.X, 'g', 5, 64),
 					strconv.FormatFloat(loc.Y, 'g', 5, 64),
@@ -45,9 +47,9 @@ func exportStateHist(h []State, k int) {
 	return
 }
 
-// write situation history every k time frames
-func exportSituHist(h []Situation, k int) {
-	filename := "situ_hist.csv"
+// write magnetization history every k time frames
+func exportMagHist(h []float64, n, k int) {
+	filename := "mag_hist.csv"
 	file, err := os.Create(filename)
 	if err != nil {
 		log.Fatal("Cannot create file", err)
@@ -56,21 +58,21 @@ func exportSituHist(h []Situation, k int) {
 	writer := csv.NewWriter(file)
 	defer writer.Flush()
 
-	writer.Write([]string{"time", "action", "magnetization"})
+	writer.Write([]string{"time", "mag"})
 	bar := pb.StartNew(len(h))
-	for time, situ := range h {
+	for i, mag := range h {
 		bar.Increment()
-		if math.Mod(float64(time), float64(k)) == 0.0 {
+		if math.Mod(float64(i), float64(k)) == 0.0 {
 			row := []string{
-				strconv.Itoa(time),
-				situ.Action,
-				strconv.FormatFloat(situ.Mag, 'g', 5, 64)}
+				// time is normalized by number of sites
+				strconv.FormatFloat(float64(i)/float64(n), 'g', 5, 64),
+				strconv.FormatFloat(mag, 'g', 5, 64)}
 			err := writer.Write(row)
 			if err != nil {
 				log.Fatal("Cannot write to file", err)
 			}
 		}
 	}
-	bar.FinishPrint("situation history exported")
+	bar.FinishPrint("magnetization history exported")
 	return
 }

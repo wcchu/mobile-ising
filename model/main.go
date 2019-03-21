@@ -7,7 +7,7 @@ import (
 )
 
 // Global constants
-const lenEvol = 50000
+const lenEvol = 100000
 const numSites = 400
 const meanConns = 4
 const maxConns = 8
@@ -21,7 +21,7 @@ func main() {
 	rand.Seed(seed)
 
 	temperature := 1.0 // TODO: loop over temperatures
-	stateHist, situHist := evolve(temperature, numSites, lenEvol, meanConns, maxConns)
+	stateHist, magHist := evolve(temperature, numSites, lenEvol, meanConns, maxConns)
 	exportStateHist(stateHist, 100)
-	exportSituHist(situHist, 100)
+	exportMagHist(magHist, numSites, 100)
 }

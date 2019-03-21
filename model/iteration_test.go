@@ -23,14 +23,14 @@ func TestIterate(t *testing.T) {
 	}
 
 	tests := []struct {
-		temp      float64
-		state     model.State
-		situation model.Situation
+		temp  float64
+		state model.State
+		mag   float64
 	}{
 		{
-			temp:      1.0,
-			state:     sampState,
-			situation: model.Situation{Action: "none", Mag: 0.0},
+			temp:  1.0,
+			state: sampState,
+			mag:   0.0,
 		},
 	}
 
@@ -38,17 +38,13 @@ func TestIterate(t *testing.T) {
 	rand.Seed(seed)
 
 	for _, tt := range tests {
-		predState, predSitu := model.Iterate(tt.state, tt.temp)
+		predState, predMag := model.Iterate(tt.state, tt.temp)
 		// connections should not change
 		if !reflect.DeepEqual(predState.Connections, tt.state.Connections) {
 			t.Error("connections expected not changed but changed")
 		}
-		// action among "none", "flip", "move"
-		if predSitu.Action != "none" && predSitu.Action != "flip" && predSitu.Action != "move" {
-			t.Error("unrecognized action")
-		}
 		// magnetization at most one-spin change
-		if math.Abs(predSitu.Mag-tt.situation.Mag) > 2.0/float64(len(tt.state.Spins)) {
+		if math.Abs(predMag-tt.mag) > 2.0/float64(len(tt.state.Spins)) {
 			t.Error("magnetization changed more than allowed")
 		}
 	}
