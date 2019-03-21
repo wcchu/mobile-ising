@@ -47,6 +47,21 @@ func TestIterate(t *testing.T) {
 		if math.Abs(predMag-tt.mag) > 2.0/float64(len(tt.state.Spins)) {
 			t.Error("magnetization changed more than allowed")
 		}
+		// states
+		numCh := 0
+		for iloc, loc := range tt.state.Locations {
+			if predState.Locations[iloc].X != loc.X || predState.Locations[iloc].Y != loc.Y {
+				numCh++
+			}
+		}
+		for ispin, spin := range tt.state.Spins {
+			if predState.Spins[ispin] != spin {
+				numCh++
+			}
+		}
+		if numCh > 1 {
+			t.Errorf("old state = %+v, new state = %+v; more than one site/feature changed", tt.state, predState)
+		}
 	}
 }
 
