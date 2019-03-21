@@ -21,38 +21,32 @@ type State struct {
 }
 
 // evolve runs the evolution of state in time from a random initial state
-// T = temperature
-// N = num of sites
-// L = max num of iterations
-func evolve(T float64, N, L int, cmean float64, cmax int) ([]State, []float64) {
+// inputs: T = temperature, N = num of sites, L = max time steps
+// outputs: state history, magnetization history, time step reaching convergence
+func evolve(T float64, N, L int, cmean float64, cmax int) ([]State, []float64, int) {
 	// build connectivity distribution
 	ps := GetConnDist(cmean, cmax, forceConns)
 
-	// build initial state/magnetization
-	st := initState(N, ps)
-	mag := GetMag(st.Spins)
-	// initial history
-	var stateHist []State
-	var magHist []float64
-	stateHist = append(stateHist, st)
-	magHist = append(magHist, mag)
+	// initialization
+	stateHist := make([]State, L+1) // initial state + L iterations
+	magHist := make([]float64, L+1)
+	stateHist[0] = initState(N, ps)
+	magHist[0] = GetMag(stateHist[0].Spins)
 
 	// evolve state
 	bar := pb.StartNew(L)
 	for i := 1; i <= L; i++ {
 		bar.Increment()
-		st, mag = Iterate(st, T)
-		stateHist = append(stateHist, st)
-		magHist = append(magHist, mag)
+		stateHist[i], magHist[i] = Iterate(stateHist[i-1], T)
 		// if ferromagnetic, stop and return
-		if math.Abs(mag) == 1.0 {
-			return stateHist, magHist
+		if math.Abs(magHist[i]) == 1.0 {
+			return stateHist, magHist, i
 		}
 	}
 	bar.FinishPrint("evolution done")
 
-	// max num of iterations reached, return
-	return stateHist, magHist
+	// max time steps reached, return
+	return stateHist, magHist, L
 }
 
 // initState creates a random initial state
