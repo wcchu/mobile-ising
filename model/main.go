@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"math/rand"
 	"time"
 )
@@ -15,7 +16,9 @@ const forceConns = true
 // main
 func main() {
 	// set random seed to time
-	rand.Seed(time.Now().UTC().UnixNano())
+	seed := time.Now().UTC().UnixNano()
+	fmt.Printf("random seed = %v", seed)
+	rand.Seed(seed)
 
 	temperature := 1.0 // TODO: loop over temperatures
 	_, hist := evolve(temperature, numSites, lenEvol, meanConns, maxConns)

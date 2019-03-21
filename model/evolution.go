@@ -7,15 +7,15 @@ import (
 
 // Location of a site
 type Location struct {
-	x float64
-	y float64
+	X float64
+	Y float64
 }
 
 // State stores the state of the system
 type State struct {
-	locations   []Location
-	connections []int
-	spins       []int
+	Locations   []Location
+	Connections []int
+	Spins       []int
 }
 
 // evolve runs the evolution of state in time from a random initial state
@@ -31,14 +31,14 @@ func evolve(T float64, N int64, L int64, cmean float64, cmax int64) (State, []Si
 
 	// build initial state
 	st := initState(N, ps)
-	hist = append(hist, Situation{action: "init", mag: getMag(st.spins)})
+	hist = append(hist, Situation{Action: "init", Mag: GetMag(st.Spins)})
 
 	// evolve state
 	for i := int64(1); i <= L; i++ {
 		st, situ = Iterate(st, T)
 		hist = append(hist, situ)
 		// if ferromagnetic, stop and return
-		if math.Abs(situ.mag) == 1.0 {
+		if math.Abs(situ.Mag) == 1.0 {
 			return st, hist
 		}
 	}
@@ -56,7 +56,7 @@ func initState(N int64, ps []float64) State {
 	sps := make([]int, N)
 
 	for i := int64(0); i < N; i++ {
-		locs[i] = Location{x: rand.Float64(), y: rand.Float64()}
+		locs[i] = Location{X: rand.Float64(), Y: rand.Float64()}
 		c := AssignConn(ps, rand.Float64())
 		if c < 0 {
 			return State{}
@@ -66,8 +66,8 @@ func initState(N int64, ps []float64) State {
 	}
 
 	return State{
-		locations:   locs,
-		connections: conns,
-		spins:       sps,
+		Locations:   locs,
+		Connections: conns,
+		Spins:       sps,
 	}
 }

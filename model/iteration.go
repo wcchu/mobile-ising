@@ -15,8 +15,8 @@ type siteInfo struct {
 
 // Situation is the summary of one iteration
 type Situation struct {
-	action string
-	mag    float64
+	Action string
+	Mag    float64
 }
 
 // Iterate moves the state forward by one step
@@ -24,49 +24,49 @@ type Situation struct {
 // T = temperature
 func Iterate(st State, T float64) (State, Situation) {
 	// choose the operational site
-	N := len(st.locations)
+	N := len(st.Locations)
 	id := rand.Intn(N)
 	site := siteInfo{
 		id:    id,
-		loc:   st.locations[id],
-		conns: st.connections[id],
-		spin:  st.spins[id],
+		loc:   st.Locations[id],
+		conns: st.Connections[id],
+		spin:  st.Spins[id],
 	}
 	situ := Situation{
-		action: "none",
-		mag:    getMag(st.spins),
+		Action: "none",
+		Mag:    GetMag(st.Spins),
 	}
 
 	// get neighbors from current operational site
-	currNeighbors := GetNeighbors(site, st.locations)
-	currE := GetEnergy(site.spin, currNeighbors, st.spins)
+	currNeighbors := GetNeighbors(site, st.Locations)
+	currE := GetEnergy(site.spin, currNeighbors, st.Spins)
 
 	if rand.Float64() < 0.5 { // try flipping spin
 		// in simplest case, flippedE = -currentE, but we calculate it using GetEnergy for completeness
-		flippedE := GetEnergy(-site.spin, currNeighbors, st.spins)
+		flippedE := GetEnergy(-site.spin, currNeighbors, st.Spins)
 
 		// if flipping drops energy, flip it;
 		// if flipping raises energy, use conditional probability
 		dE := flippedE - currE
 		if dE < 0 || rand.Float64() < math.Exp(-dE/T) {
-			st.spins[id] = -site.spin
-			situ.action = "flip"
-			situ.mag = getMag(st.spins)
+			st.Spins[id] = -site.spin
+			situ.Action = "flip"
+			situ.Mag = GetMag(st.Spins)
 		}
 	} else { // try moving site but keeping spin; in this case magnetization doesn't change
 		candSite := siteInfo{
 			id:    id,
-			loc:   Location{x: rand.Float64(), y: rand.Float64()}, // random candidate location
-			conns: st.connections[id],
-			spin:  st.spins[id],
+			loc:   Location{X: rand.Float64(), Y: rand.Float64()}, // random candidate location
+			conns: st.Connections[id],
+			spin:  st.Spins[id],
 		}
-		candNeighbors := GetNeighbors(candSite, st.locations)
-		candE := GetEnergy(site.spin, candNeighbors, st.spins)
+		candNeighbors := GetNeighbors(candSite, st.Locations)
+		candE := GetEnergy(site.spin, candNeighbors, st.Spins)
 
 		dE := candE - currE
 		if dE < 0 || rand.Float64() < math.Exp(-dE/T) {
-			st.locations[id] = candSite.loc
-			situ.action = "move"
+			st.Locations[id] = candSite.loc
+			situ.Action = "move"
 		}
 	}
 	// if neither action is taken, state and situation stay the same
@@ -80,7 +80,7 @@ func GetNeighbors(s siteInfo, locs []Location) []int {
 	// calculate distances from operational site to all sites
 	ds := make([]float64, len(locs))
 	for id, loc := range locs {
-		ds[id] = math.Sqrt(math.Pow(s.loc.x-loc.x, 2) + math.Pow(s.loc.y-loc.y, 2))
+		ds[id] = math.Sqrt(math.Pow(s.loc.X-loc.X, 2) + math.Pow(s.loc.Y-loc.Y, 2))
 	}
 
 	// convert indices of ds to an array
@@ -126,8 +126,8 @@ func GetEnergy(s0 int, ns, ss []int) float64 {
 	return K * float64(sum)
 }
 
-// getMag calculates the magnetization for given spins of a state
-func getMag(sps []int) float64 {
+// GetMag calculates the magnetization for given spins of a state
+func GetMag(sps []int) float64 {
 	N := len(sps)
 	sum := 0
 	for _, s := range sps {

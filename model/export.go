@@ -23,8 +23,8 @@ func exportMagHist(hist []Situation) {
 		if math.Mod(float64(time), 100.0) == 0.0 {
 			row := []string{
 				strconv.Itoa(time),
-				situ.action,
-				strconv.FormatFloat(situ.mag, 'g', 5, 64)}
+				situ.Action,
+				strconv.FormatFloat(situ.Mag, 'g', 5, 64)}
 			err := writer.Write(row)
 			if err != nil {
 				log.Fatal("Cannot write to file", err)
