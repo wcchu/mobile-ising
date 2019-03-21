@@ -2,3 +2,4 @@ go.mod
 *.sh
 *.exe
 *.csv
+.Rhistory
