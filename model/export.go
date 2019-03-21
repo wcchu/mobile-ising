@@ -8,9 +8,9 @@ import (
 	"strconv"
 )
 
-// write state values of the player to a csv file
+// write situation history
 func exportMagHist(hist []Situation) {
-	filename := "mag_hist.csv"
+	filename := "situ_hist.csv"
 	file, err := os.Create(filename)
 	if err != nil {
 		log.Fatal("Cannot create file", err)
@@ -20,7 +20,7 @@ func exportMagHist(hist []Situation) {
 	defer writer.Flush()
 
 	for time, situ := range hist {
-		if math.Mod(float64(time), 100.0) == 0.0 {
+		if math.Mod(float64(time), 10.0) == 0.0 {
 			row := []string{
 				strconv.Itoa(time),
 				situ.Action,
@@ -31,6 +31,5 @@ func exportMagHist(hist []Situation) {
 			}
 		}
 	}
-
 	return
 }

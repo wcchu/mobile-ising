@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"math/rand"
 	"time"
 )
@@ -17,10 +17,10 @@ const forceConns = true
 func main() {
 	// set random seed to time
 	seed := time.Now().UTC().UnixNano()
-	fmt.Printf("random seed = %v", seed)
+	log.Printf("random seed = %v", seed)
 	rand.Seed(seed)
 
 	temperature := 1.0 // TODO: loop over temperatures
-	_, hist := evolve(temperature, numSites, lenEvol, meanConns, maxConns)
-	exportMagHist(hist)
+	_, situHist := evolve(temperature, numSites, lenEvol, meanConns, maxConns)
+	exportMagHist(situHist)
 }
