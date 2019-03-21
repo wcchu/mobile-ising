@@ -41,7 +41,6 @@ func evolve(T float64, N, L int, cmean float64, cmax int) ([]State, []Situation)
 	bar := pb.StartNew(L)
 	for i := 1; i <= L; i++ {
 		bar.Increment()
-		//time.Sleep(time.Millisecond)
 		st, situ = Iterate(st, T)
 		stateHist = append(stateHist, st)
 		situHist = append(situHist, situ)
@@ -50,7 +49,7 @@ func evolve(T float64, N, L int, cmean float64, cmax int) ([]State, []Situation)
 			return stateHist, situHist
 		}
 	}
-	bar.FinishPrint("The End!")
+	bar.FinishPrint("evolution done")
 
 	// max num of iterations reached, return
 	return stateHist, situHist

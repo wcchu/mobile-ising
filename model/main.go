@@ -21,6 +21,7 @@ func main() {
 	rand.Seed(seed)
 
 	temperature := 1.0 // TODO: loop over temperatures
-	_, situHist := evolve(temperature, numSites, lenEvol, meanConns, maxConns)
-	exportMagHist(situHist)
+	stateHist, situHist := evolve(temperature, numSites, lenEvol, meanConns, maxConns)
+	exportStateHist(stateHist, 100)
+	exportSituHist(situHist, 100)
 }
