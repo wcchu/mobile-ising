@@ -13,6 +13,16 @@ const meanConns = 4
 const maxConns = 8
 const forceConns = true
 
+type tempStateHist struct {
+	temp float64
+	hist []State
+}
+
+type tempMagHist struct {
+	temp float64
+	hist []float64
+}
+
 // main
 func main() {
 	// set random seed to time
@@ -20,15 +30,15 @@ func main() {
 	log.Printf("random seed = %v", seed)
 	rand.Seed(seed)
 
-	tempStateHist, tempMagHist := scan(0.0, 1.0, 2)
+	stateRecord, magRecord := scan(0.0, 2.0, 3)
 
 	// write history to local
-	//exportStateHist(stateHist, 10)
-	//exportMagHist(magHist, numSites, 100)
+	exportStateRecord(stateRecord, 10)
+	exportMagRecord(magRecord, numSites, 100)
 }
 
 // scan over temperatures from T0 to T1 with totally n stops including T0 and T1
-func scan(T0, T1 float64, n int) ([][]State, [][]float64) {
+func scan(T0, T1 float64, n int) ([]tempStateHist, []tempMagHist) {
 	var dT float64
 	if n < 1 {
 		panic("not enough scan slices")
@@ -39,12 +49,15 @@ func scan(T0, T1 float64, n int) ([][]State, [][]float64) {
 		dT = (T1 - T0) / float64(n-1)
 	}
 
-	TSHist := make([][]State, n)
-	TMHist := make([][]float64, n)
+	TSHist := make([]tempStateHist, n)
+	TMHist := make([]tempMagHist, n)
 
 	T := T0
 	for j := 0; j < n; j++ {
-		TSHist[j], TMHist[j] = evolve(T, numSites, lenEvol, meanConns, maxConns)
+		TSHist[j].temp = T
+		TMHist[j].temp = T
+		log.Printf("running evolution for temperature at %f", T)
+		TSHist[j].hist, TMHist[j].hist = evolve(T, numSites, lenEvol, meanConns, maxConns)
 		T = T + dT
 	}
 

@@ -6,12 +6,10 @@ import (
 	"math"
 	"os"
 	"strconv"
-
-	pb "gopkg.in/cheggaaa/pb.v1"
 )
 
 // print out at most nOutTimes equally spread time frames along state history
-func exportStateHist(h []State, nOutTimes int) {
+func exportStateRecord(r []tempStateHist, nOutTimes int) {
 	filename := "state_hist.csv"
 	file, err := os.Create(filename)
 	if err != nil {
@@ -21,37 +19,38 @@ func exportStateHist(h []State, nOutTimes int) {
 	writer := csv.NewWriter(file)
 	defer writer.Flush()
 
-	writer.Write([]string{"time", "site", "x", "y", "conns", "spin"})
-	nSites := len(h[0].Spins)
-	nTimes := len(h)
+	writer.Write([]string{"temp", "time", "site", "x", "y", "conns", "spin"})
+	nTimes := len(r[0].hist) // total time defined by the lowest-temp scan
+	nSites := len(r[0].hist[0].Spins)
 	k := math.Ceil(float64(nTimes) / float64(nOutTimes)) // output every k time frames
 
-	bar := pb.StartNew(nTimes)
-	for i, state := range h { // loop over times
-		bar.Increment()
-		if math.Mod(float64(i), k) == 0.0 {
-			for id, loc := range state.Locations { // loop over sites
-				row := []string{
-					// unit of time is defined by number of sites
-					strconv.FormatFloat(float64(i)/float64(nSites), 'g', 5, 64),
-					strconv.Itoa(id),
-					strconv.FormatFloat(loc.X, 'g', 5, 64),
-					strconv.FormatFloat(loc.Y, 'g', 5, 64),
-					strconv.Itoa(state.Connections[id]),
-					strconv.Itoa(state.Spins[id])}
-				err := writer.Write(row)
-				if err != nil {
-					log.Fatal("Cannot write to file", err)
+	for _, scan := range r { // loop over scans
+		T := scan.temp
+		for i, state := range scan.hist { // loop over times
+			if math.Mod(float64(i), k) == 0.0 {
+				for id, loc := range state.Locations { // loop over sites
+					row := []string{
+						strconv.FormatFloat(T, 'g', 5, 64),
+						// unit of time is defined by number of sites
+						strconv.FormatFloat(float64(i)/float64(nSites), 'g', 5, 64),
+						strconv.Itoa(id),
+						strconv.FormatFloat(loc.X, 'g', 5, 64),
+						strconv.FormatFloat(loc.Y, 'g', 5, 64),
+						strconv.Itoa(state.Connections[id]),
+						strconv.Itoa(state.Spins[id])}
+					err := writer.Write(row)
+					if err != nil {
+						log.Fatal("Cannot write to file", err)
+					}
 				}
 			}
 		}
 	}
-	bar.FinishPrint("state history exported")
 	return
 }
 
 // print out at most nOutTimes equally spread time frames along magnetization history
-func exportMagHist(h []float64, nSites, nOutTimes int) {
+func exportMagRecord(r []tempMagHist, nSites, nOutTimes int) {
 	filename := "mag_hist.csv"
 	file, err := os.Create(filename)
 	if err != nil {
@@ -61,24 +60,25 @@ func exportMagHist(h []float64, nSites, nOutTimes int) {
 	writer := csv.NewWriter(file)
 	defer writer.Flush()
 
-	writer.Write([]string{"time", "mag"})
-	nTimes := len(h)
+	writer.Write([]string{"temp", "time", "mag"})
+	nTimes := len(r[0].hist)
 	k := math.Ceil(float64(nTimes) / float64(nOutTimes)) // output every k time frames
 
-	bar := pb.StartNew(nTimes)
-	for i, mag := range h {
-		bar.Increment()
-		if math.Mod(float64(i), k) == 0.0 {
-			row := []string{
-				// unit of time is defined by number of sites
-				strconv.FormatFloat(float64(i)/float64(nSites), 'g', 5, 64),
-				strconv.FormatFloat(mag, 'g', 5, 64)}
-			err := writer.Write(row)
-			if err != nil {
-				log.Fatal("Cannot write to file", err)
+	for _, scan := range r {
+		T := scan.temp
+		for i, mag := range scan.hist {
+			if math.Mod(float64(i), k) == 0.0 {
+				row := []string{
+					strconv.FormatFloat(T, 'g', 5, 64),
+					// unit of time is defined by number of sites
+					strconv.FormatFloat(float64(i)/float64(nSites), 'g', 5, 64),
+					strconv.FormatFloat(mag, 'g', 5, 64)}
+				err := writer.Write(row)
+				if err != nil {
+					log.Fatal("Cannot write to file", err)
+				}
 			}
 		}
 	}
-	bar.FinishPrint("magnetization history exported")
 	return
 }
