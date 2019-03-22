@@ -26,26 +26,26 @@ func exportStateRecord(r []tempStateHist, nOutTimes int) {
 
 	for _, scan := range r { // loop over scans
 		T := scan.temp
-		for i, state := range scan.hist { // loop over times
-			if math.Mod(float64(i), k) == 0.0 {
-				for id, loc := range state.Locations { // loop over sites
-					row := []string{
-						strconv.FormatFloat(T, 'g', 5, 64),
-						// unit of time is defined by number of sites
-						strconv.FormatFloat(float64(i)/float64(nSites), 'g', 5, 64),
-						strconv.Itoa(id),
-						strconv.FormatFloat(loc.X, 'g', 5, 64),
-						strconv.FormatFloat(loc.Y, 'g', 5, 64),
-						strconv.Itoa(state.Connections[id]),
-						strconv.Itoa(state.Spins[id])}
-					err := writer.Write(row)
-					if err != nil {
-						log.Fatal("Cannot write to file", err)
-					}
+		for i := 0; i < len(scan.hist); i += int(k) { // loop over times
+			state := scan.hist[i]
+			for id, loc := range state.Locations { // loop over sites
+				row := []string{
+					strconv.FormatFloat(T, 'g', 5, 64),
+					// unit of time is defined by number of sites
+					strconv.FormatFloat(float64(i)/float64(nSites), 'g', 5, 64),
+					strconv.Itoa(id),
+					strconv.FormatFloat(loc.X, 'g', 5, 64),
+					strconv.FormatFloat(loc.Y, 'g', 5, 64),
+					strconv.Itoa(state.Connections[id]),
+					strconv.Itoa(state.Spins[id])}
+				err := writer.Write(row)
+				if err != nil {
+					log.Fatal("Cannot write to file", err)
 				}
 			}
 		}
 	}
+
 	return
 }
 
@@ -66,18 +66,17 @@ func exportMagRecord(r []tempMagHist, nSites, nOutTimes int) {
 
 	for _, scan := range r {
 		T := scan.temp
-		for i, mag := range scan.hist {
-			if math.Mod(float64(i), k) == 0.0 {
-				row := []string{
-					strconv.FormatFloat(T, 'g', 5, 64),
-					// unit of time is defined by number of sites
-					strconv.FormatFloat(float64(i)/float64(nSites), 'g', 5, 64),
-					strconv.FormatFloat(mag, 'g', 5, 64)}
-				err := writer.Write(row)
-				if err != nil {
-					log.Fatal("Cannot write to file", err)
-				}
+		for i := 0; i < len(scan.hist); i += int(k) {
+			row := []string{
+				strconv.FormatFloat(T, 'g', 5, 64),
+				// unit of time is defined by number of sites
+				strconv.FormatFloat(float64(i)/float64(nSites), 'g', 5, 64),
+				strconv.FormatFloat(scan.hist[i], 'g', 5, 64)}
+			err := writer.Write(row)
+			if err != nil {
+				log.Fatal("Cannot write to file", err)
 			}
+
 		}
 	}
 	return
