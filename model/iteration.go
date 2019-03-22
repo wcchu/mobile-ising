@@ -39,14 +39,14 @@ func Iterate(stInp State, T float64) (State, float64) {
 	currNeighbors := GetNeighbors(site, st.Locations)
 	currE := GetEnergy(site.spin, currNeighbors, st.Spins)
 
-	if rand.Float64() < 0.5 { // try flipping spin
+	if rand.Float64() > iterMode { // try flipping spin
 		// in simplest case, flippedE = -currentE, but we calculate it using GetEnergy for completeness
 		flippedE := GetEnergy(-site.spin, currNeighbors, st.Spins)
 
 		// if flipping drops energy, flip it;
 		// if flipping raises energy, use conditional probability
 		dE := flippedE - currE
-		if dE < 0 || rand.Float64() < math.Exp(-dE/T) {
+		if dE < 0 || rand.Float64() < ExcProb(dE, T) {
 			st.Spins[id] = -site.spin
 			mag = GetMag(st.Spins)
 		}
@@ -60,13 +60,23 @@ func Iterate(stInp State, T float64) (State, float64) {
 		candNeighbors := GetNeighbors(candSite, st.Locations)
 		candE := GetEnergy(site.spin, candNeighbors, st.Spins)
 
+		// if moving drops energy, flip it;
+		// if moving raises energy, use conditional probability
 		dE := candE - currE
-		if dE < 0 || rand.Float64() < math.Exp(-dE/T) {
+		if dE < 0 || rand.Float64() < ExcProb(dE, T) {
 			st.Locations[id] = candSite.loc
 		}
 	}
 	// if neither action is taken, state and magnetization stay the same
 	return st, mag
+}
+
+// ExcProb returns the probability of excitation with given dE and T
+func ExcProb(dE, T float64) float64 {
+	if T == 0.0 { // exp(-dE/T) = 0
+		return 0.0
+	}
+	return math.Exp(-dE / T)
 }
 
 // GetNeighbors returns nc indices that have shortest (and > 0) distances

@@ -12,6 +12,7 @@ const numSites = 100
 const meanConns = 4
 const maxConns = 8
 const forceConns = true
+const iterMode = 0.5 // 0 : flip, 1 : move, 0-1 : mixed
 
 type tempStateHist struct {
 	temp float64
