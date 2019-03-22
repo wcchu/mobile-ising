@@ -15,8 +15,8 @@ type siteInfo struct {
 
 // Iterate moves the state forward by one step
 // inputs: u = input state, T = temperature
-// outputs: output state, output magnetization
-func Iterate(stInp State, T float64) (State, float64) {
+// outputs: end state, magnetization, change of energy
+func Iterate(stInp State, T float64) (State, float64, float64) {
 	// prepare state and mag before iteration
 	st := stInp
 	st.Locations = make([]Location, len(stInp.Locations))
@@ -24,7 +24,9 @@ func Iterate(stInp State, T float64) (State, float64) {
 	copy(st.Locations, stInp.Locations)
 	copy(st.Spins, stInp.Spins)
 
+	// default magnetization and change of energy
 	mag := GetMag(st.Spins)
+	shift := 0.0
 
 	// choose the operational site
 	id := rand.Intn(len(st.Locations))
@@ -47,8 +49,10 @@ func Iterate(stInp State, T float64) (State, float64) {
 		// if flipping raises energy, use conditional probability
 		dE := flippedE - currE
 		if dE < 0 || rand.Float64() < ExcProb(dE, T) {
+			// execute flipping
 			st.Spins[id] = -site.spin
 			mag = GetMag(st.Spins)
+			shift = dE
 		}
 	} else { // try moving site but keeping spin; in this case magnetization doesn't change
 		candSite := siteInfo{
@@ -64,11 +68,14 @@ func Iterate(stInp State, T float64) (State, float64) {
 		// if moving raises energy, use conditional probability
 		dE := candE - currE
 		if dE < 0 || rand.Float64() < ExcProb(dE, T) {
+			// execute moving
 			st.Locations[id] = candSite.loc
+			// mag doesn't change with moving
+			shift = dE
 		}
 	}
 	// if neither action is taken, state and magnetization stay the same
-	return st, mag
+	return st, mag, shift
 }
 
 // ExcProb returns the probability of excitation with given dE and T

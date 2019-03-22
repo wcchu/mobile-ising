@@ -5,13 +5,16 @@ state_hist <- read.csv('../model/state_hist.csv')
 state_plot <-
   ggplot(state_hist) +
   geom_point(aes(x = x, y = y, color = spin)) +
-  facet_grid(time ~ temp)
+  facet_grid(temp ~ time)
 print(state_plot)
 
 ## magnetization history
-mag_hist <- read.csv('../model/mag_hist.csv')
-mag_plot <-
-  ggplot(mag_hist) +
-  geom_point(aes(x = time, y = mag)) +
-  facet_grid(. ~ temp)
-print(mag_plot)
+macro_hist <-
+  read.csv('../model/macro_hist.csv') %>%
+  gather(key = "key", value = "value", c(mag, ener))
+
+macro_plot <-
+  ggplot(macro_hist) +
+  geom_point(aes(x = time, y = value), size = 0.5) +
+  facet_grid(key ~ temp, scales = 'free')
+print(macro_plot)
