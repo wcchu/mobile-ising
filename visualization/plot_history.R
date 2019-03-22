@@ -3,8 +3,9 @@ suppressPackageStartupMessages(library(tidyverse))
 ## state history
 state_hist <- read.csv('../model/state_hist.csv')
 state_plot <-
-  ggplot(state_hist %>% filter(time == 0.0)) +
-  geom_point(aes(x = x, y = y, color = spin))
+  ggplot(state_hist) +
+  geom_point(aes(x = x, y = y, color = spin)) +
+  facet_grid(time ~ .)
 print(state_plot)
 
 ## magnetization history
