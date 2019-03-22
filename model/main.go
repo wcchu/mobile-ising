@@ -21,8 +21,9 @@ func main() {
 	rand.Seed(seed)
 
 	temperature := 1.0 // TODO: loop over temperatures
-	stateHist, magHist, L := evolve(temperature, numSites, lenEvol, meanConns, maxConns)
-	// only export history up to step L; the rest are either converged or out of range
-	exportStateHist(stateHist[0:L+1], L/10)
-	exportMagHist(magHist[0:L+1], numSites, L/100)
+	stateHist, magHist := evolve(temperature, numSites, lenEvol, meanConns, maxConns)
+
+	// write history to local
+	exportStateHist(stateHist, 10)
+	exportMagHist(magHist, numSites, 100)
 }
