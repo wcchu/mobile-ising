@@ -6,12 +6,10 @@ import (
 	"math"
 	"os"
 	"strconv"
-
-	pb "gopkg.in/cheggaaa/pb.v1"
 )
 
-// write state history every k time frames
-func exportStateHist(h []State, k int) {
+// print out at most nOutTimes equally spread time frames along state history
+func exportStateRecord(r []tempStateHist, nOutTimes int) {
 	filename := "state_hist.csv"
 	file, err := os.Create(filename)
 	if err != nil {
@@ -21,16 +19,20 @@ func exportStateHist(h []State, k int) {
 	writer := csv.NewWriter(file)
 	defer writer.Flush()
 
-	writer.Write([]string{"time", "site", "x", "y", "conns", "spin"})
-	n := len(h[0].Spins)
-	bar := pb.StartNew(len(h))
-	for i, state := range h { // loop over times
-		bar.Increment()
-		if math.Mod(float64(i), float64(k)) == 0.0 {
+	writer.Write([]string{"temp", "time", "site", "x", "y", "conns", "spin"})
+	nTimes := len(r[0].hist) // total time defined by the lowest-temp scan
+	nSites := len(r[0].hist[0].Spins)
+	k := math.Ceil(float64(nTimes) / float64(nOutTimes)) // output every k time frames
+
+	for _, scan := range r { // loop over scans
+		T := scan.temp
+		for i := 0; i < len(scan.hist); i += int(k) { // loop over times
+			state := scan.hist[i]
 			for id, loc := range state.Locations { // loop over sites
 				row := []string{
-					// time is normalized by number of sites
-					strconv.FormatFloat(float64(i)/float64(n), 'g', 5, 64),
+					strconv.FormatFloat(T, 'g', 5, 64),
+					// unit of time is defined by number of sites
+					strconv.FormatFloat(float64(i)/float64(nSites), 'g', 5, 64),
 					strconv.Itoa(id),
 					strconv.FormatFloat(loc.X, 'g', 5, 64),
 					strconv.FormatFloat(loc.Y, 'g', 5, 64),
@@ -43,12 +45,12 @@ func exportStateHist(h []State, k int) {
 			}
 		}
 	}
-	bar.FinishPrint("state history exported")
+
 	return
 }
 
-// write magnetization history every k time frames
-func exportMagHist(h []float64, n, k int) {
+// print out at most nOutTimes equally spread time frames along magnetization history
+func exportMagRecord(r []tempMagHist, nSites, nOutTimes int) {
 	filename := "mag_hist.csv"
 	file, err := os.Create(filename)
 	if err != nil {
@@ -58,21 +60,24 @@ func exportMagHist(h []float64, n, k int) {
 	writer := csv.NewWriter(file)
 	defer writer.Flush()
 
-	writer.Write([]string{"time", "mag"})
-	bar := pb.StartNew(len(h))
-	for i, mag := range h {
-		bar.Increment()
-		if math.Mod(float64(i), float64(k)) == 0.0 {
+	writer.Write([]string{"temp", "time", "mag"})
+	nTimes := len(r[0].hist)
+	k := math.Ceil(float64(nTimes) / float64(nOutTimes)) // output every k time frames
+
+	for _, scan := range r {
+		T := scan.temp
+		for i := 0; i < len(scan.hist); i += int(k) {
 			row := []string{
-				// time is normalized by number of sites
-				strconv.FormatFloat(float64(i)/float64(n), 'g', 5, 64),
-				strconv.FormatFloat(mag, 'g', 5, 64)}
+				strconv.FormatFloat(T, 'g', 5, 64),
+				// unit of time is defined by number of sites
+				strconv.FormatFloat(float64(i)/float64(nSites), 'g', 5, 64),
+				strconv.FormatFloat(scan.hist[i], 'g', 5, 64)}
 			err := writer.Write(row)
 			if err != nil {
 				log.Fatal("Cannot write to file", err)
 			}
+
 		}
 	}
-	bar.FinishPrint("magnetization history exported")
 	return
 }

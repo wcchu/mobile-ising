@@ -65,6 +65,32 @@ func TestIterate(t *testing.T) {
 	}
 }
 
+func TestExcProb(t *testing.T) {
+	tests := []struct {
+		ener float64
+		temp float64
+		prob float64
+	}{
+		{
+			ener: 1.0,
+			temp: 0.0,
+			prob: 0.0,
+		},
+		{
+			ener: 1.0,
+			temp: 1.0,
+			prob: 0.367879,
+		},
+	}
+
+	for _, tt := range tests {
+		pred := model.ExcProb(tt.ener, tt.temp)
+		if math.Abs(pred-tt.prob) > 1e-5 {
+			t.Errorf("expected %f, got %f", tt.prob, pred)
+		}
+	}
+}
+
 func TestGetEnergy(t *testing.T) {
 	tests := []struct {
 		thisSpin    int
