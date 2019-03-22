@@ -7,11 +7,14 @@ import (
 )
 
 // Global constants
-const lenEvol = 500000
+const lenEvol = 1000000
 const numSites = 100
 const meanConns = 4
 const maxConns = 8
 const forceConns = true
+const lowTemp = 0.0
+const highTemp = 2.0
+const nTemps = 5
 const iterMode = 0.5 // 0 : flip, 1 : move, 0-1 : mixed
 
 type tempStateHist struct {
@@ -31,11 +34,11 @@ func main() {
 	log.Printf("random seed = %v", seed)
 	rand.Seed(seed)
 
-	stateRecord, magRecord := scan(0.0, 2.0, 3)
+	stateRecord, magRecord := scan(lowTemp, highTemp, nTemps)
 
 	// write history to local
 	exportStateRecord(stateRecord, 10)
-	exportMagRecord(magRecord, numSites, 100)
+	exportMagRecord(magRecord, numSites, 500)
 }
 
 // scan over temperatures from T0 to T1 with totally n stops including T0 and T1
