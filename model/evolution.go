@@ -44,10 +44,11 @@ func evolve(T float64, N, L int, cmean float64, cmax int) ([]State, []float64, [
 		bar.Increment()
 
 		// check thermalization if it's not declared yet and there are enough past energy shifts
-		if !ther && i >= N-1 {
+		nTher := therRounds * N
+		if !ther && i >= nTher-1 {
 			// the total energy shift over the last N (one round of) iterations
 			var sum float64
-			for _, ener := range enerHist[i-N+1 : i+1] {
+			for _, ener := range enerHist[i-nTher+1 : i+1] {
 				sum = sum + ener
 			}
 			// thermalized if the total shift is 0
