@@ -16,5 +16,5 @@ macro_hist <-
 macro_plot <-
   ggplot(macro_hist) +
   geom_point(aes(x = time, y = value), size = 0.5) +
-  facet_grid(key ~ temp, scales = 'free')
+  facet_grid(key ~ temp)
 print(macro_plot)
