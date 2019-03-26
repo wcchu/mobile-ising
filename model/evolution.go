@@ -40,34 +40,39 @@ func evolve(T float64, N, L int, cmean float64, cmax int) ([]State, []float64, [
 	ther := false
 	end := 0
 	bar := pb.StartNew(L)
-	for i := 0; i < L; i++ {
+	for r := 0; r < L; r++ { // loop over rounds
 		bar.Increment()
 
 		// check thermalization if it's not declared yet and there are enough past energy shifts
-		nTher := therRounds * N
-		if !ther && i >= nTher-1 {
-			// the total energy shift over the last N (one round of) iterations
+		//nTher := therRounds * N
+		if !ther && r >= therRounds-1 {
+			// all energy shifts of the last therRounds rounds have to be zero to thermalize
 			var sum float64
-			for _, ener := range enerHist[i-nTher+1 : i+1] {
-				sum = sum + ener
+			for _, e := range enerHist[r-therRounds+1 : r+1] {
+				sum = sum + math.Abs(e)
 			}
-			// thermalized if the total shift is 0
-			if math.Abs(sum) == 0.0 {
+			if sum == 0.0 {
 				ther = true
 			}
 		}
 
-		if math.Abs(magHist[i]) < 1.0 && !ther {
-			// not ferromagnetic nor thermalized yet, run iteration
-			stateHist[i+1], magHist[i+1], enerHist[i+1] = Iterate(stateHist[i], T)
-			end = i + 1 // the time index we want to record up to
+		if math.Abs(magHist[r]) < 1.0 && !ther {
+			// not ferromagnetic nor thermalized yet, run iterations for a round
+			state := stateHist[r]
+			var mag, enerIter, enerRound float64
+			for i := 0; i < N; i++ {
+				state, mag, enerIter = Iterate(state, T)
+				enerRound = enerRound + enerIter
+			}
+			stateHist[r+1], magHist[r+1], enerHist[r+1] = state, mag, enerRound
+			end = r + 1 // the time index we want to record up to
 		} else {
 			// ferromagnetic or thermalized
-			magHist[i+1] = magHist[i]
-			enerHist[i+1] = 0.0
+			magHist[r+1] = magHist[r]
+			enerHist[r+1] = 0.0
 		}
 	}
-	bar.FinishPrint(fmt.Sprintf("evolution ends at time step %d for T = %f", end, T))
+	bar.FinishPrint(fmt.Sprintf("evolution ends at %d rounds of iterations for T = %f", end, T))
 
 	// return only the evolving part of history
 	return stateHist[0 : end+1], magHist[0 : end+1], enerHist[0 : end+1]

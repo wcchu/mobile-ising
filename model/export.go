@@ -27,7 +27,6 @@ func exportStateRecord(r []tempStateHist, nOutTimes int) {
 			nTimes = len(scan.hist)
 		}
 	}
-	nSites := len(r[0].hist[0].Spins)
 	// output every k time frames
 	k := int(math.Ceil(float64(nTimes) / float64(nOutTimes)))
 
@@ -41,8 +40,7 @@ func exportStateRecord(r []tempStateHist, nOutTimes int) {
 			for id, loc := range state.Locations {
 				row := []string{
 					strconv.FormatFloat(T, 'g', 5, 64),
-					// unit of time is defined by number of sites
-					strconv.FormatFloat(float64(i)/float64(nSites), 'g', 5, 64),
+					strconv.Itoa(i),
 					strconv.Itoa(id),
 					strconv.FormatFloat(loc.X, 'g', 5, 64),
 					strconv.FormatFloat(loc.Y, 'g', 5, 64),
@@ -89,7 +87,7 @@ func exportMacroRecord(r []tempMacroHist, nSites, nOutTimes int) {
 			row := []string{
 				strconv.FormatFloat(T, 'g', 5, 64),
 				// unit of time is defined by number of sites
-				strconv.FormatFloat(float64(i)/float64(nSites), 'g', 5, 64),
+				strconv.Itoa(i),
 				strconv.FormatFloat(scan.magHist[i], 'g', 5, 64),
 				// unit of energy is defined by number of sites
 				strconv.FormatFloat(scan.enerHist[i]/float64(nSites), 'g', 5, 64)}

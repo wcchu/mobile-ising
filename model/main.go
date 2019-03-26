@@ -7,7 +7,7 @@ import (
 )
 
 // Global constants
-const lenEvol = 50000 // max num of iterations in one evolution
+const lenEvol = 100 // max num of iterations in one evolution
 const numSites = 400
 const meanConns = 4
 const maxConns = 8
@@ -15,8 +15,8 @@ const forceConns = true
 const lowTemp = 0.0
 const highTemp = 3.0
 const nTemps = 15
-const iterMode = 0.5  // 0 : flip, 1 : move, 0-1 : mixed
-const therRounds = 10 // define thermalization with the last numSite * therRounds iterations
+const iterMode = 0.5 // 0 : flip, 1 : move, 0-1 : mixed
+const therRounds = 5 // define thermalization with the last numSite * therRounds iterations
 
 type tempStateHist struct {
 	temp float64
@@ -40,7 +40,7 @@ func main() {
 
 	// write history to local
 	exportStateRecord(stateRecord, 10)
-	exportMacroRecord(macroRecord, numSites, 1000)
+	exportMacroRecord(macroRecord, numSites, 100)
 }
 
 // scan over temperatures from T0 to T1 with totally n+1 stops including T0 and T1
