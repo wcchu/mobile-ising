@@ -7,14 +7,14 @@ import (
 )
 
 // Global constants
-const lenEvol = 100 // max num of iterations in one evolution
+const lenEvol = 500 // max num of iterations in one evolution
 const numSites = 400
 const meanConns = 4
 const maxConns = 8
 const forceConns = true
 const lowTemp = 0.0
-const highTemp = 3.0
-const nTemps = 15
+const highTemp = 1.6
+const nTemps = 8
 const iterMode = 0.5 // 0 : flip, 1 : move, 0-1 : mixed
 const therRounds = 5 // define thermalization with the last numSite * therRounds iterations
 

@@ -28,7 +28,7 @@ func exportStateRecord(r []tempStateHist, nOutTimes int) {
 		}
 	}
 	// output every k time frames
-	k := int(math.Ceil(float64(nTimes) / float64(nOutTimes)))
+	k := int(math.Ceil(float64(nTimes-1) / float64(nOutTimes)))
 
 	// loop over scans
 	for _, scan := range r {
@@ -77,7 +77,7 @@ func exportMacroRecord(r []tempMacroHist, nSites, nOutTimes int) {
 		}
 	}
 	// output every k time frames
-	k := math.Ceil(float64(nTimes) / float64(nOutTimes))
+	k := math.Ceil(float64(nTimes-1) / float64(nOutTimes))
 
 	// loop over scans
 	for _, scan := range r {
