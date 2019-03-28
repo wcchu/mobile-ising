@@ -44,7 +44,7 @@ func evolve(T float64, N, L int, cmean float64, cmax int) ([]State, []float64, [
 		bar.Increment()
 
 		// check thermalization if it's not declared yet and there are enough past energy shifts
-		//nTher := therRounds * N
+		// TODO: make better thermalization criteria
 		if !ther && r >= therRounds-1 {
 			// all energy shifts of the last therRounds rounds have to be zero to thermalize
 			var sum float64
@@ -61,6 +61,7 @@ func evolve(T float64, N, L int, cmean float64, cmax int) ([]State, []float64, [
 			state := stateHist[r]
 			var mag, enerIter, enerRound float64
 			for i := 0; i < N; i++ {
+				// TODO: rotate over all sites sequentially instead of randomly picking sites
 				state, mag, enerIter = Iterate(state, T)
 				enerRound = enerRound + enerIter
 			}

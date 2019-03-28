@@ -90,6 +90,7 @@ func ExcProb(dE, T float64) float64 {
 // s = siteInfo of the operational site
 // locs = locations of all sites
 func GetNeighbors(s siteInfo, locs []Location) []int {
+	// TODO: make mirror images as extension of map to satisfy periodic consition
 	// calculate distances from operational site to all sites
 	ds := make([]float64, len(locs))
 	for id, loc := range locs {
