@@ -26,11 +26,13 @@ func TestIterate(t *testing.T) {
 		temp  float64
 		state model.State
 		mag   float64
+		ener  float64
 	}{
-		{
+		{ // initial state
 			temp:  1.0,
 			state: sampState,
 			mag:   0.0,
+			ener:  0.0,
 		},
 	}
 
@@ -38,7 +40,7 @@ func TestIterate(t *testing.T) {
 	rand.Seed(seed)
 
 	for _, tt := range tests {
-		predState, predMag := model.Iterate(tt.state, tt.temp)
+		predState, predMag, predEner := model.Iterate(tt.state, tt.temp)
 		// connections should not change
 		if !reflect.DeepEqual(predState.Connections, tt.state.Connections) {
 			t.Error("connections expected not changed but changed")
@@ -46,6 +48,10 @@ func TestIterate(t *testing.T) {
 		// magnetization at most one-spin change
 		if math.Abs(predMag-tt.mag) > 2.0/float64(len(tt.state.Spins)) {
 			t.Error("magnetization changed more than allowed")
+		}
+		// energy shift at most 2
+		if math.Abs(predEner-tt.ener) > 2.0 {
+			t.Error("energy shifted more than allowed")
 		}
 		// states
 		numCh := 0
