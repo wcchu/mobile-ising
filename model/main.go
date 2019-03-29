@@ -7,8 +7,8 @@ import (
 )
 
 // Global constants
-const lenEvol = 500 // max num of iterations in one evolution
-const numSites = 400
+const lenEvol = 10000 // max num of iterations in one evolution
+const numSites = 100
 const meanConns = 4
 const maxConns = 8
 const forceConns = true
@@ -40,7 +40,7 @@ func main() {
 
 	// write history to local
 	exportStateRecord(stateRecord, 10)
-	exportMacroRecord(macroRecord, numSites, 100)
+	exportMacroRecord(macroRecord, numSites, 500)
 }
 
 // scan over temperatures from T0 to T1 with totally n+1 stops including T0 and T1

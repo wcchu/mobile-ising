@@ -16,7 +16,7 @@ type siteInfo struct {
 // Iterate moves the state forward by one step
 // inputs: u = input state, T = temperature
 // outputs: end state, magnetization, change of energy
-func Iterate(stInp State, T float64) (State, float64, float64) {
+func Iterate(stInp State, id int, T float64) (State, float64, float64) {
 	// prepare state and mag before iteration
 	st := stInp
 	st.Locations = make([]Location, len(stInp.Locations))
@@ -28,8 +28,6 @@ func Iterate(stInp State, T float64) (State, float64, float64) {
 	mag := GetMag(st.Spins)
 	shift := 0.0
 
-	// choose the operational site
-	id := rand.Intn(len(st.Locations))
 	site := siteInfo{
 		id:    id,
 		loc:   st.Locations[id],

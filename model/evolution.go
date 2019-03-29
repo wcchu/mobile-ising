@@ -60,9 +60,8 @@ func evolve(T float64, N, L int, cmean float64, cmax int) ([]State, []float64, [
 			// not ferromagnetic nor thermalized yet, run iterations for a round
 			state := stateHist[r]
 			var mag, enerIter, enerRound float64
-			for i := 0; i < N; i++ {
-				// TODO: rotate over all sites sequentially instead of randomly picking sites
-				state, mag, enerIter = Iterate(state, T)
+			for i := 0; i < N; i++ { // i is the id of the site
+				state, mag, enerIter = Iterate(state, i, T)
 				enerRound = enerRound + enerIter
 			}
 			stateHist[r+1], magHist[r+1], enerHist[r+1] = state, mag, enerRound

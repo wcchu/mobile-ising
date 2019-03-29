@@ -40,7 +40,7 @@ func TestIterate(t *testing.T) {
 	rand.Seed(seed)
 
 	for _, tt := range tests {
-		predState, predMag, predEner := model.Iterate(tt.state, tt.temp)
+		predState, predMag, predEner := model.Iterate(tt.state, 0, tt.temp)
 		// connections should not change
 		if !reflect.DeepEqual(predState.Connections, tt.state.Connections) {
 			t.Error("connections expected not changed but changed")

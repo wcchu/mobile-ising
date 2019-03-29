@@ -15,7 +15,7 @@ macro_hist <-
 
 macro_plot <-
   ggplot(macro_hist) +
-  geom_point(aes(x = time, y = value), size = 0.5) +
+  geom_point(aes(x = time, y = value), size = 0.2) +
   facet_grid(temp ~ key)
 ggsave("macro_hist.png", macro_plot, width = 15, height = 50, units = "cm")
 
