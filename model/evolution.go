@@ -45,14 +45,16 @@ func evolve(T float64, N, L int, cmean float64, cmax int) ([]State, []float64, [
 
 		// check thermalization if it's not declared yet and there are enough past energy shifts
 		// TODO: make better thermalization criteria
-		if !ther && r >= therRounds-1 {
-			// all energy shifts of the last therRounds rounds have to be zero to thermalize
-			var sum float64
-			for _, e := range enerHist[r-therRounds+1 : r+1] {
-				sum = sum + math.Abs(e)
-			}
-			if sum == 0.0 {
-				ther = true
+		if therRounds > 0 {
+			if !ther && r >= therRounds-1 {
+				// all energy shifts of the last therRounds rounds have to be zero to thermalize
+				var sum float64
+				for _, e := range enerHist[r-therRounds+1 : r+1] {
+					sum = sum + math.Abs(e)
+				}
+				if sum == 0.0 {
+					ther = true
+				}
 			}
 		}
 
