@@ -6,11 +6,11 @@ import (
 	"sort"
 )
 
-type siteInfo struct {
-	id    int
-	loc   Location
-	conns int
-	spin  int
+type SiteInfo struct {
+	ID    int
+	Loc   Location
+	Conns int
+	Spin  int
 }
 
 // Iterate moves the state forward by one step
@@ -28,46 +28,46 @@ func Iterate(stInp State, id int, T float64) (State, float64, float64) {
 	mag := GetMag(st.Spins)
 	shift := 0.0
 
-	site := siteInfo{
-		id:    id,
-		loc:   st.Locations[id],
-		conns: st.Connections[id],
-		spin:  st.Spins[id],
+	site := SiteInfo{
+		ID:    id,
+		Loc:   st.Locations[id],
+		Conns: st.Connections[id],
+		Spin:  st.Spins[id],
 	}
 
 	// get neighbors from current operational site
 	currNeighbors := GetNeighbors(site, st.Locations)
-	currE := GetEnergy(site.spin, currNeighbors, st.Spins)
+	currE := GetEnergy(site.Spin, currNeighbors, st.Spins)
 
 	if rand.Float64() > iterMode { // try flipping spin
 		// in simplest case, flippedE = -currentE, but we calculate it using GetEnergy for completeness
-		flipE := GetEnergy(-site.spin, currNeighbors, st.Spins)
+		flipE := GetEnergy(-site.Spin, currNeighbors, st.Spins)
 
 		// if flipping drops energy, flip it;
 		// if flipping raises energy, use conditional probability
 		dE := flipE - currE
 		if dE < 0 || rand.Float64() < ExcProb(dE, T) {
 			// execute flipping
-			st.Spins[id] = -site.spin
+			st.Spins[id] = -site.Spin
 			mag = GetMag(st.Spins)
 			shift = dE
 		}
 	} else { // try moving site but keeping spin; in this case magnetization doesn't change
-		moveSite := siteInfo{
-			id:    id,
-			loc:   Location{X: rand.Float64(), Y: rand.Float64()}, // random candidate location
-			conns: site.conns,
-			spin:  site.spin,
+		moveSite := SiteInfo{
+			ID:    id,
+			Loc:   Location{X: rand.Float64(), Y: rand.Float64()}, // random candidate location
+			Conns: site.Conns,
+			Spin:  site.Spin,
 		}
 		moveNeighbors := GetNeighbors(moveSite, st.Locations)
-		moveE := GetEnergy(site.spin, moveNeighbors, st.Spins)
+		moveE := GetEnergy(site.Spin, moveNeighbors, st.Spins)
 
 		// if moving drops energy, flip it;
 		// if moving raises energy, use conditional probability
 		dE := moveE - currE
 		if dE < 0 || rand.Float64() < ExcProb(dE, T) {
 			// execute moving
-			st.Locations[id] = moveSite.loc
+			st.Locations[id] = moveSite.Loc
 			// mag doesn't change with moving
 			shift = dE
 		}
@@ -85,36 +85,50 @@ func ExcProb(dE, T float64) float64 {
 }
 
 // GetNeighbors returns nc indices that have shortest (and > 0) distances
-// s = siteInfo of the operational site
+// s = SiteInfo of the operational site
 // locs = locations of all sites
-func GetNeighbors(s siteInfo, locs []Location) []int {
-	// TODO: make mirror images as extension of map to satisfy periodic consition
-	// calculate distances from operational site to all sites
-	ds := make([]float64, len(locs))
-	for id, loc := range locs {
-		ds[id] = math.Sqrt(math.Pow(s.loc.X-loc.X, 2) + math.Pow(s.loc.Y-loc.Y, 2))
+func GetNeighbors(s SiteInfo, locs []Location) []int {
+	// make mirror images as extension of original map to satisfy periodic consition
+	N := len(locs)                  // num of sites
+	bigMap := make([]Location, N*9) // site locations on the 9-block extended map
+	var mapID int = 0
+	for _, xShift := range []int{-1, 0, 1} {
+		for _, yShift := range []int{-1, 0, 1} {
+			for id, loc := range locs {
+				bigMap[id+mapID*N] = Location{X: loc.X + float64(xShift), Y: loc.Y + float64(yShift)}
+			}
+			mapID = mapID + 1
+		}
 	}
 
+	// calculate distances from operational site to all sites
+	ds := make([]float64, N*9)
+	for id, loc := range bigMap {
+		ds[id] = math.Sqrt(math.Pow(s.Loc.X-loc.X, 2) + math.Pow(s.Loc.Y-loc.Y, 2))
+	}
+
+	// sort sites by the distance to operational site
 	// convert indices of ds to an array
-	ids := make([]int, len(ds))
-	vals := make([]float64, len(ds))
+	ids := make([]int, N*9)
+	vals := make([]float64, N*9)
 	for i, d := range ds {
 		ids[i] = i
 		vals[i] = d
 	}
-
 	// sort by value instead of index using Interface
 	sort.Sort(TwoArrs{IDs: ids, Vals: vals})
 
 	// collect neighbors
 	var neighbors []int
 	for _, id := range ids {
+		// convert extended site id on extended map to corresponding original id
+		realID := id % N
 		// skip the operational site as its own neighbor
-		if id != s.id {
-			neighbors = append(neighbors, id)
+		if realID != s.ID {
+			neighbors = append(neighbors, realID)
 		}
 		// return when there are enough neighbors
-		if len(neighbors) == s.conns {
+		if len(neighbors) == s.Conns {
 			return neighbors
 		}
 	}
