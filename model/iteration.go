@@ -41,11 +41,11 @@ func Iterate(stInp State, id int, T float64) (State, float64, float64) {
 
 	if rand.Float64() > iterMode { // try flipping spin
 		// in simplest case, flippedE = -currentE, but we calculate it using GetEnergy for completeness
-		flippedE := GetEnergy(-site.spin, currNeighbors, st.Spins)
+		flipE := GetEnergy(-site.spin, currNeighbors, st.Spins)
 
 		// if flipping drops energy, flip it;
 		// if flipping raises energy, use conditional probability
-		dE := flippedE - currE
+		dE := flipE - currE
 		if dE < 0 || rand.Float64() < ExcProb(dE, T) {
 			// execute flipping
 			st.Spins[id] = -site.spin
@@ -53,21 +53,21 @@ func Iterate(stInp State, id int, T float64) (State, float64, float64) {
 			shift = dE
 		}
 	} else { // try moving site but keeping spin; in this case magnetization doesn't change
-		candSite := siteInfo{
+		moveSite := siteInfo{
 			id:    id,
 			loc:   Location{X: rand.Float64(), Y: rand.Float64()}, // random candidate location
 			conns: site.conns,
 			spin:  site.spin,
 		}
-		candNeighbors := GetNeighbors(candSite, st.Locations)
-		candE := GetEnergy(site.spin, candNeighbors, st.Spins)
+		moveNeighbors := GetNeighbors(moveSite, st.Locations)
+		moveE := GetEnergy(site.spin, moveNeighbors, st.Spins)
 
 		// if moving drops energy, flip it;
 		// if moving raises energy, use conditional probability
-		dE := candE - currE
+		dE := moveE - currE
 		if dE < 0 || rand.Float64() < ExcProb(dE, T) {
 			// execute moving
-			st.Locations[id] = candSite.loc
+			st.Locations[id] = moveSite.loc
 			// mag doesn't change with moving
 			shift = dE
 		}
