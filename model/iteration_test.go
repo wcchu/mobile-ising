@@ -10,18 +10,19 @@ import (
 	model "github.com/wcchu/mobile-ising/model"
 )
 
-func TestIterate(t *testing.T) {
-	sampState := model.State{
-		Locations: []model.Location{
-			model.Location{X: 0.1, Y: 0.1},
-			model.Location{X: 0.1, Y: 0.9},
-			model.Location{X: 0.9, Y: 0.1},
-			model.Location{X: 0.9, Y: 0.9},
-		},
-		Connections: []int{2, 2, 2, 2},
-		Spins:       []int{1, -1, 1, -1},
-	}
+// sampState is used in multiple tests
+var sampState model.State = model.State{
+	Locations: []model.Location{
+		model.Location{X: 0.11, Y: 0.1},
+		model.Location{X: 0.1, Y: 0.91},
+		model.Location{X: 0.9, Y: 0.11},
+		model.Location{X: 0.9, Y: 0.91},
+	},
+	Connections: []int{2, 2, 2, 2},
+	Spins:       []int{1, -1, 1, -1},
+}
 
+func TestIterate(t *testing.T) {
 	tests := []struct {
 		temp  float64
 		state model.State
@@ -40,7 +41,7 @@ func TestIterate(t *testing.T) {
 	rand.Seed(seed)
 
 	for _, tt := range tests {
-		predState, predMag, predEner := model.Iterate(tt.state, tt.temp)
+		predState, predMag, predEner := model.Iterate(tt.state, 0, tt.temp)
 		// connections should not change
 		if !reflect.DeepEqual(predState.Connections, tt.state.Connections) {
 			t.Error("connections expected not changed but changed")
@@ -93,6 +94,38 @@ func TestExcProb(t *testing.T) {
 		pred := model.ExcProb(tt.ener, tt.temp)
 		if math.Abs(pred-tt.prob) > 1e-5 {
 			t.Errorf("expected %f, got %f", tt.prob, pred)
+		}
+	}
+}
+
+func TestGetNeighbors(t *testing.T) {
+	tests := []struct {
+		site      model.SiteInfo
+		locs      []model.Location
+		neighbors []int
+	}{
+		{
+			site: model.SiteInfo{
+				ID:    0,
+				Loc:   sampState.Locations[0],
+				Conns: 1,
+				Spin:  sampState.Spins[0],
+			},
+			locs:      sampState.Locations,
+			neighbors: []int{1},
+		},
+	}
+
+	for _, tt := range tests {
+		pred := model.GetNeighbors(tt.site, tt.locs)
+		if len(pred) != len(tt.neighbors) {
+			t.Errorf("expected %d neighbors, got %d", len(tt.neighbors), len(pred))
+		} else {
+			for i, id := range tt.neighbors {
+				if pred[i] != id {
+					t.Errorf("expected the %d th neighbor with id %d, got id %d", i, id, pred[i])
+				}
+			}
 		}
 	}
 }

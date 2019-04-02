@@ -44,15 +44,17 @@ func evolve(T float64, N, L int, cmean float64, cmax int) ([]State, []float64, [
 		bar.Increment()
 
 		// check thermalization if it's not declared yet and there are enough past energy shifts
-		//nTher := therRounds * N
-		if !ther && r >= therRounds-1 {
-			// all energy shifts of the last therRounds rounds have to be zero to thermalize
-			var sum float64
-			for _, e := range enerHist[r-therRounds+1 : r+1] {
-				sum = sum + math.Abs(e)
-			}
-			if sum == 0.0 {
-				ther = true
+		// TODO: make better thermalization criteria
+		if therRounds > 0 {
+			if !ther && r >= therRounds-1 {
+				// all energy shifts of the last therRounds rounds have to be zero to thermalize
+				var sum float64
+				for _, e := range enerHist[r-therRounds+1 : r+1] {
+					sum = sum + math.Abs(e)
+				}
+				if sum == 0.0 {
+					ther = true
+				}
 			}
 		}
 
@@ -60,8 +62,8 @@ func evolve(T float64, N, L int, cmean float64, cmax int) ([]State, []float64, [
 			// not ferromagnetic nor thermalized yet, run iterations for a round
 			state := stateHist[r]
 			var mag, enerIter, enerRound float64
-			for i := 0; i < N; i++ {
-				state, mag, enerIter = Iterate(state, T)
+			for i := 0; i < N; i++ { // i is the id of the site
+				state, mag, enerIter = Iterate(state, i, T)
 				enerRound = enerRound + enerIter
 			}
 			stateHist[r+1], magHist[r+1], enerHist[r+1] = state, mag, enerRound
