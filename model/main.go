@@ -14,8 +14,8 @@ const maxConns = 8
 const forceConns = true
 const lowTemp = 0.0
 const highTemp = 1.6
-const nTemps = 0
-const iterMode = 0.0 // 0 : flip, 1 : move, 0-1 : mixed
+const nTemps = 8
+const iterMode = 0.5 // 0 : flip, 1 : move, 0-1 : mixed
 const therRounds = 0 // define thermalization with the last numSite * therRounds iterations
 
 type tempStateHist struct {
