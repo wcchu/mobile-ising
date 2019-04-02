@@ -8,32 +8,31 @@ import (
 	"gopkg.in/cheggaaa/pb.v1"
 )
 
-// Location of a site
+// Location is the location of the site on the lattice map
 type Location struct {
-	X float64
-	Y float64
+	X int
+	Y int
 }
 
-// State stores the state of the system
-type State struct {
-	Locations   []Location
-	Connections []int
-	Spins       []int
+// SiteInfo describes a site
+type SiteInfo struct {
+	Loc  Location
+	Spin int
 }
+
+// State maps site ID to SiteInfo
+type State map[int]SiteInfo
 
 // evolve runs the evolution of state in time from a random initial state
 // inputs: T = temperature, N = num of sites, L = max time steps
 // outputs: state history, magnetization history, energy shift history, time step reaching convergence
-func evolve(T float64, N, L int, cmean float64, cmax int) ([]State, []float64, []float64) {
-	// build connectivity distribution
-	ps := GetConnDist(cmean, cmax, forceConns)
-
+func evolve(T float64, D, L int) ([]State, []float64, []float64) {
 	// initialization
 	stateHist := make([]State, L+1) // initial state + L iterations
 	magHist := make([]float64, L+1)
 	enerHist := make([]float64, L+1)
-	stateHist[0] = initState(N, ps)
-	magHist[0] = GetMag(stateHist[0].Spins)
+	stateHist[0] = initState(D)
+	magHist[0] = GetMag(stateHist[0])
 	enerHist[0] = 0.0
 
 	// evolve state
@@ -62,8 +61,8 @@ func evolve(T float64, N, L int, cmean float64, cmax int) ([]State, []float64, [
 			// not ferromagnetic nor thermalized yet, run iterations for a round
 			state := stateHist[r]
 			var mag, enerIter, enerRound float64
-			for i := 0; i < N; i++ { // i is the id of the site
-				state, mag, enerIter = Iterate(state, i, T)
+			for i := 0; i < D*D; i++ { // i is the id of the site
+				state, mag, enerIter = Iterate(D, state, i, T)
 				enerRound = enerRound + enerIter
 			}
 			stateHist[r+1], magHist[r+1], enerHist[r+1] = state, mag, enerRound
@@ -80,27 +79,19 @@ func evolve(T float64, N, L int, cmean float64, cmax int) ([]State, []float64, [
 	return stateHist[0 : end+1], magHist[0 : end+1], enerHist[0 : end+1]
 }
 
-// initState creates a random initial state
-// N = num of sites
-// ps = prob distribution of having k connections
-func initState(N int, ps []float64) State {
-	locs := make([]Location, N)
-	conns := make([]int, N)
-	sps := make([]int, N)
-
-	for i := 0; i < N; i++ {
-		locs[i] = Location{X: rand.Float64(), Y: rand.Float64()}
-		c := AssignConn(ps, rand.Float64())
-		if c < 0 {
-			return State{}
+// initState creates an initial state with random spins
+// D = dimension of map
+func initState(D int) State {
+	state := make(State)
+	var i int
+	for ix := 0; ix < D; ix++ {
+		for iy := 0; iy < D; iy++ {
+			state[i] = SiteInfo{
+				Loc:  Location{X: ix, Y: iy},
+				Spin: rand.Intn(2)*2 - 1,
+			}
+			i = i + 1
 		}
-		conns[i] = c
-		sps[i] = rand.Intn(2)*2 - 1
 	}
-
-	return State{
-		Locations:   locs,
-		Connections: conns,
-		Spins:       sps,
-	}
+	return state
 }
