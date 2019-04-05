@@ -3,37 +3,55 @@ package main_test
 import (
 	"math"
 	"math/rand"
-	"reflect"
 	"testing"
 	"time"
 
 	model "github.com/wcchu/mobile-ising/model"
 )
 
-// sampState is used in multiple tests
+// sampState is a map with 5x5 sites used in multiple tests
 var sampState model.State = model.State{
-	Locations: []model.Location{
-		model.Location{X: 0.11, Y: 0.1},
-		model.Location{X: 0.1, Y: 0.91},
-		model.Location{X: 0.9, Y: 0.11},
-		model.Location{X: 0.9, Y: 0.91},
-	},
-	Connections: []int{2, 2, 2, 2},
-	Spins:       []int{1, -1, 1, -1},
+	0: model.SiteInfo{Loc: model.Location{X: 0, Y: 0}, Spin: 1},
+	1: model.SiteInfo{Loc: model.Location{X: 0, Y: 1}, Spin: -1},
+	2: model.SiteInfo{Loc: model.Location{X: 0, Y: 2}, Spin: 1},
+	3: model.SiteInfo{Loc: model.Location{X: 0, Y: 3}, Spin: -1},
+	4: model.SiteInfo{Loc: model.Location{X: 0, Y: 4}, Spin: 1},
+
+	5: model.SiteInfo{Loc: model.Location{X: 1, Y: 0}, Spin: -1},
+	6: model.SiteInfo{Loc: model.Location{X: 1, Y: 1}, Spin: 1},
+	7: model.SiteInfo{Loc: model.Location{X: 1, Y: 2}, Spin: -1},
+	8: model.SiteInfo{Loc: model.Location{X: 1, Y: 3}, Spin: 1},
+	9: model.SiteInfo{Loc: model.Location{X: 1, Y: 4}, Spin: -1},
+
+	10: model.SiteInfo{Loc: model.Location{X: 2, Y: 0}, Spin: 1},
+	11: model.SiteInfo{Loc: model.Location{X: 2, Y: 1}, Spin: -1},
+	12: model.SiteInfo{Loc: model.Location{X: 2, Y: 2}, Spin: 1},
+	13: model.SiteInfo{Loc: model.Location{X: 2, Y: 3}, Spin: -1},
+	14: model.SiteInfo{Loc: model.Location{X: 2, Y: 4}, Spin: 1},
+
+	15: model.SiteInfo{Loc: model.Location{X: 3, Y: 0}, Spin: -1},
+	16: model.SiteInfo{Loc: model.Location{X: 3, Y: 1}, Spin: 1},
+	17: model.SiteInfo{Loc: model.Location{X: 3, Y: 2}, Spin: -1},
+	18: model.SiteInfo{Loc: model.Location{X: 3, Y: 3}, Spin: 1},
+	19: model.SiteInfo{Loc: model.Location{X: 3, Y: 4}, Spin: -1},
+
+	20: model.SiteInfo{Loc: model.Location{X: 4, Y: 0}, Spin: 1},
+	21: model.SiteInfo{Loc: model.Location{X: 4, Y: 1}, Spin: -1},
+	22: model.SiteInfo{Loc: model.Location{X: 4, Y: 2}, Spin: 1},
+	23: model.SiteInfo{Loc: model.Location{X: 4, Y: 3}, Spin: -1},
+	24: model.SiteInfo{Loc: model.Location{X: 4, Y: 4}, Spin: 1},
 }
 
 func TestIterate(t *testing.T) {
 	tests := []struct {
 		temp  float64
+		size  int
 		state model.State
-		mag   float64
-		ener  float64
 	}{
 		{ // initial state
 			temp:  1.0,
+			size:  5,
 			state: sampState,
-			mag:   0.0,
-			ener:  0.0,
 		},
 	}
 
@@ -41,33 +59,30 @@ func TestIterate(t *testing.T) {
 	rand.Seed(seed)
 
 	for _, tt := range tests {
-		predState, predMag, predEner := model.Iterate(tt.state, 0, tt.temp)
-		// connections should not change
-		if !reflect.DeepEqual(predState.Connections, tt.state.Connections) {
-			t.Error("connections expected not changed but changed")
+		initMag := model.GetMag(tt.state)
+		initEner := model.GetEnergy(tt.state, tt.size)
+		finalState, finalMag, finalEner := model.Iterate(tt.size, tt.state, 12, tt.temp)
+		change := make(model.State)
+		for id, finalSite := range finalState {
+			initSite := tt.state[id]
+			if finalSite.Loc.X != initSite.Loc.X || finalSite.Loc.Y != initSite.Loc.Y || finalSite.Spin != initSite.Spin {
+				change[id] = finalSite
+			}
+		}
+		if len(change) > 2 {
+			t.Errorf("state was changed more than allowed; changed sites = %+v", change)
 		}
 		// magnetization at most one-spin change
-		if math.Abs(predMag-tt.mag) > 2.0/float64(len(tt.state.Spins)) {
-			t.Error("magnetization changed more than allowed")
+		allowedMagChg := 2.0 / float64(tt.size*tt.size)
+		if math.Abs(finalMag-initMag) > allowedMagChg {
+			t.Errorf("magnetization changed from %f to %f which was more than allowed (%f)",
+				initMag, finalMag, allowedMagChg)
 		}
 		// energy shift at most 2
-		if math.Abs(predEner-tt.ener) > 2.0 {
-			t.Error("energy shifted more than allowed")
-		}
-		// states
-		numCh := 0
-		for iloc, loc := range tt.state.Locations {
-			if predState.Locations[iloc].X != loc.X || predState.Locations[iloc].Y != loc.Y {
-				numCh++
-			}
-		}
-		for ispin, spin := range tt.state.Spins {
-			if predState.Spins[ispin] != spin {
-				numCh++
-			}
-		}
-		if numCh > 1 {
-			t.Errorf("old state = %+v, new state = %+v; more than one site/feature changed", tt.state, predState)
+		allowedEnerChg := 2.0
+		if math.Abs(finalEner-initEner) > allowedEnerChg {
+			t.Errorf("energy changed from %f to %f which was more than allowed (%f)",
+				initEner, finalEner, allowedEnerChg)
 		}
 	}
 }
@@ -98,32 +113,50 @@ func TestExcProb(t *testing.T) {
 	}
 }
 
-func TestGetNeighbors(t *testing.T) {
+func TestGetKiez(t *testing.T) {
+	centralKiez := model.State{
+		6: model.SiteInfo{Loc: model.Location{X: 1, Y: 1}, Spin: 1},
+		7: model.SiteInfo{Loc: model.Location{X: 1, Y: 2}, Spin: -1},
+		8: model.SiteInfo{Loc: model.Location{X: 1, Y: 3}, Spin: 1},
+
+		11: model.SiteInfo{Loc: model.Location{X: 2, Y: 1}, Spin: -1},
+		12: model.SiteInfo{Loc: model.Location{X: 2, Y: 2}, Spin: 1},
+		13: model.SiteInfo{Loc: model.Location{X: 2, Y: 3}, Spin: -1},
+
+		16: model.SiteInfo{Loc: model.Location{X: 3, Y: 1}, Spin: 1},
+		17: model.SiteInfo{Loc: model.Location{X: 3, Y: 2}, Spin: -1},
+		18: model.SiteInfo{Loc: model.Location{X: 3, Y: 3}, Spin: 1},
+	}
 	tests := []struct {
-		site      model.SiteInfo
-		locs      []model.Location
-		neighbors []int
+		id    int
+		state model.State
+		order int
+		kiez  model.State
 	}{
 		{
-			site: model.SiteInfo{
-				ID:    0,
-				Loc:   sampState.Locations[0],
-				Conns: 1,
-				Spin:  sampState.Spins[0],
-			},
-			locs:      sampState.Locations,
-			neighbors: []int{1},
+			id:    12,
+			state: sampState,
+			order: 1,
+			kiez:  centralKiez,
 		},
 	}
 
 	for _, tt := range tests {
-		pred := model.GetNeighbors(tt.site, tt.locs)
-		if len(pred) != len(tt.neighbors) {
-			t.Errorf("expected %d neighbors, got %d", len(tt.neighbors), len(pred))
+		pred := model.GetKiez(tt.id, tt.state, tt.order)
+		if len(pred) != len(tt.kiez) {
+			t.Errorf("expected %d neighbors, got %d", len(tt.kiez), len(pred))
 		} else {
-			for i, id := range tt.neighbors {
-				if pred[i] != id {
-					t.Errorf("expected the %d th neighbor with id %d, got id %d", i, id, pred[i])
+			for id, site := range tt.kiez {
+				predSite, ok := pred[id]
+				if !ok {
+					t.Errorf("site id %d not found in prediction", id)
+				}
+				if predSite.Spin != site.Spin {
+					t.Errorf("expected site %d with spin %d, got spin %d", id, site.Spin, predSite.Spin)
+				}
+				if predSite.Loc.X != site.Loc.X || predSite.Loc.Y != site.Loc.Y {
+					t.Errorf("expected site %d with location %d %d, got location %d %d",
+						id, site.Loc.X, site.Loc.Y, predSite.Loc.X, predSite.Loc.Y)
 				}
 			}
 		}
@@ -132,21 +165,19 @@ func TestGetNeighbors(t *testing.T) {
 
 func TestGetEnergy(t *testing.T) {
 	tests := []struct {
-		thisSpin    int
-		neighborIDs []int
-		allSpins    []int
-		energy      float64
+		state    model.State
+		boundary int
+		energy   float64
 	}{
 		{
-			thisSpin:    1,
-			neighborIDs: []int{1, 3, 6, 7},
-			allSpins:    []int{1, -1, 1, -1, 1, -1, 1, -1},
-			energy:      2,
+			state:    sampState,
+			boundary: 5,
+			energy:   30.0,
 		},
 	}
 
 	for _, tt := range tests {
-		pred := model.GetEnergy(tt.thisSpin, tt.neighborIDs, tt.allSpins)
+		pred := model.GetEnergy(tt.state, tt.boundary)
 		if pred != tt.energy {
 			t.Errorf("expected %f, got %f", tt.energy, pred)
 		}
@@ -155,17 +186,17 @@ func TestGetEnergy(t *testing.T) {
 
 func TestGetMag(t *testing.T) {
 	tests := []struct {
-		spins []int
+		state model.State
 		mag   float64
 	}{
 		{
-			spins: []int{1, -1, 1, -1, 1, -1, 1, -1, 1},
-			mag:   1.0 / 9.0,
+			state: sampState,
+			mag:   1.0 / 25.0,
 		},
 	}
 
 	for _, tt := range tests {
-		pred := model.GetMag(tt.spins)
+		pred := model.GetMag(tt.state)
 		if pred != tt.mag {
 			t.Errorf("expected %f, got %f", tt.mag, pred)
 		}

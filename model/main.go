@@ -7,15 +7,13 @@ import (
 )
 
 // Global constants
-const lenEvol = 10000 // max num of iterations in one evolution
-const numSites = 100
-const meanConns = 4
-const maxConns = 8
+const evolLen = 100 // max num of iteration rounds in one evolution
+const mapDim = 20   // total num of sites = mapDim^2
 const forceConns = true
 const lowTemp = 0.0
-const highTemp = 1.6
-const nTemps = 8
-const iterMode = 0.5 // 0 : flip, 1 : move, 0-1 : mixed
+const highTemp = 4.0
+const nTemps = 20
+const iterMode = 0.0 // 0 : flip, 1 : move, 0-1 : mixed
 const therRounds = 0 // define thermalization with the last numSite * therRounds iterations
 
 type tempStateHist struct {
@@ -40,7 +38,7 @@ func main() {
 
 	// write history to local
 	exportStateRecord(stateRecord, 10)
-	exportMacroRecord(macroRecord, numSites, 1)
+	exportMacroRecord(macroRecord, Min(1000, evolLen))
 }
 
 // scan over temperatures from T0 to T1 with totally n+1 stops including T0 and T1
@@ -61,7 +59,7 @@ func scan(T0, T1 float64, n int) ([]tempStateHist, []tempMacroHist) {
 		TSHist[j].temp = T
 		TMHist[j].temp = T
 		log.Printf("running evolution for temperature at %f", T)
-		TSHist[j].hist, TMHist[j].magHist, TMHist[j].enerHist = evolve(T, numSites, lenEvol, meanConns, maxConns)
+		TSHist[j].hist, TMHist[j].magHist, TMHist[j].enerHist = evolve(T, mapDim, evolLen)
 		T = T + dT
 	}
 
