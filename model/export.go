@@ -19,7 +19,7 @@ func exportStateRecord(r []tempStateHist, nOutTimes int) {
 	writer := csv.NewWriter(file)
 	defer writer.Flush()
 
-	writer.Write([]string{"temp", "time", "site", "x", "y", "conns", "spin"})
+	writer.Write([]string{"temp", "time", "site", "x", "y", "spin"})
 	// find the longest evolution time among scans
 	var nTimes int
 	for _, scan := range r {
@@ -40,6 +40,7 @@ func exportStateRecord(r []tempStateHist, nOutTimes int) {
 			for id, site := range state {
 				row := []string{
 					strconv.FormatFloat(T, 'g', 5, 64),
+					strconv.Itoa(i),
 					strconv.Itoa(id),
 					strconv.Itoa(site.Loc.X),
 					strconv.Itoa(site.Loc.Y),
