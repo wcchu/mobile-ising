@@ -33,9 +33,9 @@ func exportStateRecord(r []tempStateHist, nOutTimes int) {
 	// loop over temperatures
 	for _, scan := range r {
 		T := scan.temp
-		// loop over time frames
-		for i := 0; i < len(scan.hist); i += k {
-			state := scan.hist[i]
+		// loop over time frames of the first run
+		for i := 0; i < len(scan.hist[0]); i += k {
+			state := scan.hist[0][i]
 			// loop over sites
 			for id, site := range state {
 				row := []string{
