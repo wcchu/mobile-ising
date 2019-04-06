@@ -11,7 +11,7 @@ const evolLen = 100 // max num of iteration rounds in one evolution
 const mapDim = 20   // map size; num of sites = mapDim^2
 const lowTemp = 0.0
 const highTemp = 3.0
-const nTemps = 15
+const nTemps = 30
 const nRuns = 5
 const iterMode = 0.0 // 0 : flip, 1 : move, 0-1 : mixed
 
