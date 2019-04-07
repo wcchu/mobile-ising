@@ -60,8 +60,7 @@ func TestIterate(t *testing.T) {
 
 	for _, tt := range tests {
 		initMag := model.GetMag(tt.state)
-		initEner := model.GetEnergy(tt.state, tt.size)
-		finalState, finalMag, finalEner := model.Iterate(tt.size, tt.state, 12, tt.temp)
+		finalState, finalMag, _ := model.Iterate(tt.size, tt.state, 12, tt.temp)
 		change := make(model.State)
 		for id, finalSite := range finalState {
 			initSite := tt.state[id]
@@ -77,12 +76,6 @@ func TestIterate(t *testing.T) {
 		if math.Abs(finalMag-initMag) > allowedMagChg {
 			t.Errorf("magnetization changed from %f to %f which was more than allowed (%f)",
 				initMag, finalMag, allowedMagChg)
-		}
-		// energy shift at most 2
-		allowedEnerChg := 2.0
-		if math.Abs(finalEner-initEner) > allowedEnerChg {
-			t.Errorf("energy changed from %f to %f which was more than allowed (%f)",
-				initEner, finalEner, allowedEnerChg)
 		}
 	}
 }

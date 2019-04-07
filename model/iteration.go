@@ -129,7 +129,7 @@ func DistXY(loc1, loc2 Location, D int) (int, int) {
 	return dx, dy
 }
 
-// PickMoveID
+// PickMoveID picks a direct neighbor that the operational site wants to swap with
 func PickMoveID(id0 int, kiez State, D int) int {
 	site0 := kiez[id0]
 	// collect candidate IDs

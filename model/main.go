@@ -3,22 +3,24 @@ package main
 import (
 	"log"
 	"math/rand"
+	"runtime"
+	"sync"
 	"time"
 )
 
 // Global constants
-const evolLen = 100 // max num of iteration rounds in one evolution
-const mapDim = 20   // total num of sites = mapDim^2
-const forceConns = true
+const evolLen = 500 // max num of iteration rounds in one evolution
+const mapDim = 20   // map size; num of sites = mapDim^2
 const lowTemp = 0.0
 const highTemp = 4.0
 const nTemps = 20
+const nRuns = 10
 const iterMode = 0.0 // 0 : flip, 1 : move, 0-1 : mixed
-const therRounds = 0 // define thermalization with the last numSite * therRounds iterations
+const maxCPUs = 4
 
 type tempStateHist struct {
 	temp float64
-	hist []State
+	hist [][]State // runs and iterations
 }
 
 type tempMacroHist struct {
@@ -26,6 +28,8 @@ type tempMacroHist struct {
 	magHist  []float64
 	enerHist []float64
 }
+
+type empty struct{}
 
 // main
 func main() {
@@ -37,7 +41,7 @@ func main() {
 	stateRecord, macroRecord := scan(lowTemp, highTemp, nTemps)
 
 	// write history to local
-	exportStateRecord(stateRecord, 10)
+	exportStateRecord(stateRecord, Min(10, evolLen))
 	exportMacroRecord(macroRecord, Min(1000, evolLen))
 }
 
@@ -54,14 +58,26 @@ func scan(T0, T1 float64, n int) ([]tempStateHist, []tempMacroHist) {
 	TSHist := make([]tempStateHist, n+1)
 	TMHist := make([]tempMacroHist, n+1)
 
-	T := T0
+	cpus := Min(runtime.NumCPU(), maxCPUs)
+	runtime.GOMAXPROCS(cpus)
+	log.Printf("number of cpus = %d", cpus)
+	sem := make(chan struct{}, cpus) // limit semaphore to number of available cpus
+	var wg sync.WaitGroup
+	wg.Wait()
 	for j := 0; j <= n; j++ {
-		TSHist[j].temp = T
-		TMHist[j].temp = T
-		log.Printf("running evolution for temperature at %f", T)
-		TSHist[j].hist, TMHist[j].magHist, TMHist[j].enerHist = evolve(T, mapDim, evolLen)
-		T = T + dT
+		wg.Add(1)
+		sem <- struct{}{}
+		go func(j int) {
+			defer wg.Done()
+			T := T0 + float64(j)*dT
+			log.Printf("T = %f running", T)
+			TSHist[j].temp, TMHist[j].temp = T, T
+			TSHist[j].hist, TMHist[j].magHist, TMHist[j].enerHist = Evolve(T, mapDim, evolLen, nRuns)
+			log.Printf("T = %f is done", T)
+			<-sem
+		}(j)
 	}
+	wg.Wait()
 
 	return TSHist, TMHist
 }
