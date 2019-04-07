@@ -22,7 +22,13 @@ macro_plot <-
 ggsave("macro_hist.png", macro_plot, width = 10, height = 2*ntemps, units = "cm")
 
 temp_mag <-
-  ggplot(macro_hist %>% filter(time == end_time)) +
+  ggplot(macro_hist %>% filter(time == end_time, key == "mag")) +
   geom_point(aes(x = temp, y = value)) +
-  facet_grid(. ~ key)
-print(temp_mag)
+  labs(x = 'Temperature', y = 'Magnetization')
+ggsave("temp_mag.png", temp_mag, width = 12, height = 10, units = "cm")
+
+temp_ener <-
+  ggplot(macro_hist %>% filter(key == "ener") %>% group_by(temp) %>% summarise(energy = sum(value))) +
+  geom_point(aes(x = temp, y = energy)) +
+  labs(x = 'Temperature', y = 'Energy change')
+ggsave("temp_ener.png", temp_ener, width = 12, height = 10, units = "cm")
