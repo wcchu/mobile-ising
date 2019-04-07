@@ -1,7 +1,9 @@
 suppressPackageStartupMessages(library(tidyverse))
 
 ## state history
-state_hist <- read.csv('../model/state_hist.csv')
+state_hist <-
+  read.csv('../model/state_hist.csv') %>%
+  filter(temp %% 1.0 == 0.0)
 ntemps <- length(unique(state_hist$temp))
 state_plot <-
   ggplot(state_hist) +
@@ -12,7 +14,7 @@ ggsave("state_hist.png", state_plot, width = 25, height = 2*ntemps, units = "cm"
 ## magnetization history
 macro_hist <- read.csv('../model/macro_hist.csv')
 macro_hist <- macro_hist %>% mutate(mag = abs(mag)) %>% gather(key = "key", value = "value", c(mag, ener))
-
+ntemps <- length(unique(macro_hist$temp))
 end_time <- max(macro_hist$time)
 
 macro_plot <-
