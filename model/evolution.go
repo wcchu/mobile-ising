@@ -1,10 +1,7 @@
 package main
 
 import (
-	"fmt"
 	"math/rand"
-
-	"gopkg.in/cheggaaa/pb.v1"
 )
 
 // Location is the location of the site on the lattice map
@@ -37,9 +34,7 @@ func Evolve(T float64, D, L, Q int) ([][]State, []float64, []float64) {
 		enerHist[run] = make([]float64, L+1)
 	}
 
-	bar := pb.StartNew(Q)
 	for run := 0; run < Q; run++ {
-		bar.Increment()
 		stateHist[run][0] = initState(D)
 		magHist[run][0] = GetMag(stateHist[run][0])
 		enerHist[run][0] = 0.0
@@ -55,7 +50,6 @@ func Evolve(T float64, D, L, Q int) ([][]State, []float64, []float64) {
 			stateHist[run][r+1], magHist[run][r+1], enerHist[run][r+1] = state, mag, enerRound
 		}
 	}
-	bar.FinishPrint(fmt.Sprintf("evolution ends for T = %f", T))
 
 	return stateHist, AveRuns(magHist), AveRuns(enerHist)
 }
