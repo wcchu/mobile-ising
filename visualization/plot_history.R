@@ -3,17 +3,18 @@ suppressPackageStartupMessages(library(tidyverse))
 ## state history
 state_hist <-
   read.csv('../model/state_hist.csv') %>%
-  filter(temp %% 1.0 == 0.0)
+  filter(temp %% 1.0 == 0.0) %>%
+  mutate(spin = as.character(spin))
 ntemps <- length(unique(state_hist$temp))
 state_plot <-
   ggplot(state_hist) +
-  geom_point(aes(x = x, y = y, color = as.character(spin)), size = 0.1) +
+  geom_point(aes(x = x, y = y, color = spin), size = 0.1) +
   facet_grid(temp ~ time)
-ggsave("state_hist.png", state_plot, width = 25, height = 2*ntemps, units = "cm")
+ggsave("state_hist.png", state_plot, width = 22, height = 2*ntemps, units = "cm")
 
 ## magnetization history
 macro_hist <- read.csv('../model/macro_hist.csv')
-macro_hist <- macro_hist %>% mutate(mag = abs(mag)) %>% gather(key = "key", value = "value", c(mag, ener))
+macro_hist <- macro_hist %>% gather(key = "key", value = "value", c(mag, ener))
 ntemps <- length(unique(macro_hist$temp))
 end_time <- max(macro_hist$time)
 

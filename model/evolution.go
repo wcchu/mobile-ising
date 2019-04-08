@@ -1,6 +1,7 @@
 package main
 
 import (
+	"math"
 	"math/rand"
 )
 
@@ -47,7 +48,7 @@ func Evolve(T float64, D, L, Q int) ([][]State, []float64, []float64) {
 				state, mag, enerIter = Iterate(D, state, i, T)
 				enerRound = enerRound + enerIter
 			}
-			stateHist[run][r+1], magHist[run][r+1], enerHist[run][r+1] = state, mag, enerRound
+			stateHist[run][r+1], magHist[run][r+1], enerHist[run][r+1] = state, math.Abs(mag), enerRound
 		}
 	}
 

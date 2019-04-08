@@ -13,7 +13,7 @@ const evolLen = 500 // max num of iteration rounds in one evolution
 const mapDim = 20   // map size; num of sites = mapDim^2
 const lowTemp = 0.0
 const highTemp = 4.0
-const nTemps = 20
+const nTemps = 40
 const nRuns = 10
 const iterMode = 0.0 // 0 : flip, 1 : move, 0-1 : mixed
 const maxCPUs = 4
@@ -70,10 +70,9 @@ func scan(T0, T1 float64, n int) ([]tempStateHist, []tempMacroHist) {
 		go func(j int) {
 			defer wg.Done()
 			T := T0 + float64(j)*dT
-			log.Printf("T = %f running", T)
+			log.Printf("running T = %f", T)
 			TSHist[j].temp, TMHist[j].temp = T, T
 			TSHist[j].hist, TMHist[j].magHist, TMHist[j].enerHist = Evolve(T, mapDim, evolLen, nRuns)
-			log.Printf("T = %f is done", T)
 			<-sem
 		}(j)
 	}
