@@ -20,14 +20,8 @@ func exportStateRecord(r []tempStateHist, nOutTimes int) {
 	defer writer.Flush()
 
 	writer.Write([]string{"temp", "time", "site", "x", "y", "spin"})
-	// find the longest evolution time among scans
-	var nTimes int
-	for _, scan := range r {
-		if len(scan.hist) > nTimes {
-			nTimes = len(scan.hist)
-		}
-	}
 	// output every k time frames
+	nTimes := len(r[0].hist[0])
 	k := int(math.Ceil(float64(nTimes-1) / float64(nOutTimes)))
 
 	// loop over temperatures
