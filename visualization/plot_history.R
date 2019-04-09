@@ -42,6 +42,7 @@ temp_ener <-
            group_by(temp) %>%
            summarise(energy = sum(value))) +
   geom_point(aes(x = temp, y = energy)) +
+  ylim(-2, 0) +
   labs(x = 'Temperature', y = 'Energy change')
 ggsave(sprintf("temp_ener_%s.png", mode),
        temp_ener, width = 12, height = 10, units = "cm")
