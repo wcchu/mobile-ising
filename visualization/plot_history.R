@@ -1,6 +1,6 @@
 suppressPackageStartupMessages(library(tidyverse))
 
-mode <- '1'
+mode <- '0.0'
 
 ## state history
 state_hist <-

@@ -8,16 +8,12 @@ import (
 // Iterate moves the state forward by one step
 // inputs: u = input state, T = temperature
 // outputs: end state, magnetization, change of energy
-func Iterate(D int, inputState State, siteID int, T float64) (State, float64, float64) {
+func Iterate(D int, inputState State, siteID int, T float64) State {
 	// duplicate the state that can change in this iteration
 	state := make(State)
 	for k, v := range inputState {
 		state[k] = v
 	}
-
-	// default magnetization and change of energy
-	mag := GetMag(state)
-	shift := 0.0
 	site := state[siteID]
 
 	// get neighbors in 5x5 neighborhood of current operational site
@@ -35,8 +31,6 @@ func Iterate(D int, inputState State, siteID int, T float64) (State, float64, fl
 		if dE < 0 || rand.Float64() < ExcProb(dE, T) {
 			// execute flipping
 			state[siteID] = site
-			mag = GetMag(state)
-			shift = dE
 		}
 	} else { // try moving site but keeping spin; in this case magnetization doesn't change
 		moveID := PickMoveID(siteID, kiez, D)
@@ -49,12 +43,10 @@ func Iterate(D int, inputState State, siteID int, T float64) (State, float64, fl
 		if dE < 0 || rand.Float64() < ExcProb(dE, T) {
 			// execute moving
 			state.Move(siteID, moveID)
-			// mag doesn't change with moving
-			shift = dE
 		}
 	}
 	// if neither action is taken, state and magnetization stay the same
-	return state, mag, shift
+	return state
 }
 
 // GetKiez returns the H-th order neighborhood around the operational site
@@ -117,7 +109,7 @@ func GetMag(state State) float64 {
 	for _, site := range state {
 		sum = sum + site.Spin
 	}
-	return float64(sum) / float64(N)
+	return math.Abs(float64(sum)) / float64(N)
 }
 
 // DistXY calculates the distances in x and in y separately between two locations considering periodic boundary of size D

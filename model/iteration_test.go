@@ -59,8 +59,7 @@ func TestIterate(t *testing.T) {
 	rand.Seed(seed)
 
 	for _, tt := range tests {
-		initMag := model.GetMag(tt.state)
-		finalState, finalMag, _ := model.Iterate(tt.size, tt.state, 12, tt.temp)
+		finalState := model.Iterate(tt.size, tt.state, 12, tt.temp)
 		change := make(model.State)
 		for id, finalSite := range finalState {
 			initSite := tt.state[id]
@@ -70,12 +69,6 @@ func TestIterate(t *testing.T) {
 		}
 		if len(change) > 2 {
 			t.Errorf("state was changed more than allowed; changed sites = %+v", change)
-		}
-		// magnetization at most one-spin change
-		allowedMagChg := 2.0 / float64(tt.size*tt.size)
-		if math.Abs(finalMag-initMag) > allowedMagChg {
-			t.Errorf("magnetization changed from %f to %f which was more than allowed (%f)",
-				initMag, finalMag, allowedMagChg)
 		}
 	}
 }
