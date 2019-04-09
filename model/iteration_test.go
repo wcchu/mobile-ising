@@ -59,7 +59,7 @@ func TestIterate(t *testing.T) {
 	rand.Seed(seed)
 
 	for _, tt := range tests {
-		finalState, _ := model.Iterate(tt.size, tt.state, 12, tt.temp)
+		finalState := model.Iterate(tt.size, tt.state, 12, tt.temp)
 		change := make(model.State)
 		for id, finalSite := range finalState {
 			initSite := tt.state[id]
