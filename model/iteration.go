@@ -109,7 +109,7 @@ func GetMag(state State) float64 {
 	for _, site := range state {
 		sum = sum + site.Spin
 	}
-	return float64(sum) / float64(N)
+	return math.Abs(float64(sum)) / float64(N)
 }
 
 // DistXY calculates the distances in x and in y separately between two locations considering periodic boundary of size D
