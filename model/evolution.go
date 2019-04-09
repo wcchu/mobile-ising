@@ -1,7 +1,6 @@
 package main
 
 import (
-	"math"
 	"math/rand"
 )
 
@@ -43,12 +42,13 @@ func Evolve(T float64, D, L, Q int) ([][]State, []float64, []float64) {
 		// evolve state
 		for r := 0; r < L; r++ { // loop over rounds
 			state := stateHist[run][r]
-			var mag, enerIter, enerRound float64
+			var enerIter, enerRound float64
 			for i := 0; i < D*D; i++ { // i is the id of the site
-				state, mag, enerIter = Iterate(D, state, i, T)
+				state, enerIter = Iterate(D, state, i, T)
 				enerRound = enerRound + enerIter
 			}
-			stateHist[run][r+1], magHist[run][r+1], enerHist[run][r+1] = state, math.Abs(mag), enerRound
+			stateHist[run][r+1], enerHist[run][r+1] = state, enerRound
+			magHist[run][r+1] = GetMag(stateHist[run][r+1])
 		}
 	}
 

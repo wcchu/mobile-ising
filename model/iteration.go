@@ -8,7 +8,7 @@ import (
 // Iterate moves the state forward by one step
 // inputs: u = input state, T = temperature
 // outputs: end state, magnetization, change of energy
-func Iterate(D int, inputState State, siteID int, T float64) (State, float64, float64) {
+func Iterate(D int, inputState State, siteID int, T float64) (State, float64) {
 	// duplicate the state that can change in this iteration
 	state := make(State)
 	for k, v := range inputState {
@@ -16,7 +16,6 @@ func Iterate(D int, inputState State, siteID int, T float64) (State, float64, fl
 	}
 
 	// default magnetization and change of energy
-	mag := GetMag(state)
 	shift := 0.0
 	site := state[siteID]
 
@@ -35,7 +34,6 @@ func Iterate(D int, inputState State, siteID int, T float64) (State, float64, fl
 		if dE < 0 || rand.Float64() < ExcProb(dE, T) {
 			// execute flipping
 			state[siteID] = site
-			mag = GetMag(state)
 			shift = dE
 		}
 	} else { // try moving site but keeping spin; in this case magnetization doesn't change
@@ -54,7 +52,7 @@ func Iterate(D int, inputState State, siteID int, T float64) (State, float64, fl
 		}
 	}
 	// if neither action is taken, state and magnetization stay the same
-	return state, mag, shift
+	return state, shift
 }
 
 // GetKiez returns the H-th order neighborhood around the operational site
