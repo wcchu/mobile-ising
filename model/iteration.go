@@ -6,8 +6,8 @@ import (
 )
 
 // Iterate moves the state forward by one step
-// inputs: u = input state, T = temperature
-// outputs: end state, magnetization, change of energy
+// inputs: D = size of map, inputState = input state, T = temperature
+// outputs: state after iteration
 func Iterate(D int, inputState State, siteID int, T float64) State {
 	// duplicate the state that can change in this iteration
 	state := make(State)
@@ -51,10 +51,7 @@ func Iterate(D int, inputState State, siteID int, T float64) State {
 
 // GetKiez returns the H-th order neighborhood around the operational site
 // Number of returned sites = (2 * H + 1) ** 2 (including the operational site)
-// inputs:
-//		id0 = id of operational site
-//		state = state of system
-//		H = dim of neighborhood
+// inputs: id0 = id of operational site, state = state of system, H = see above
 // outputs: neighborhood in State format
 func GetKiez(id0 int, state State, H int) State {
 	// validate size of kiez
@@ -83,7 +80,8 @@ func ExcProb(dE, T float64) float64 {
 }
 
 // GetEnergy calculates the energy for H_i = -K sum(S_i * S_j) where i, j are 1st order neighbors
-// inputs: sites in State format
+// inputs: neighborhood in State format, D = size of full map
+// output: energy defined by Hamiltonian within the neighborhood
 func GetEnergy(kiez State, D int) float64 {
 	// set K to -1
 	var K float64 = -1
@@ -103,6 +101,8 @@ func GetEnergy(kiez State, D int) float64 {
 }
 
 // GetMag calculates the magnetization for given spins of a state
+// input: state = State
+// output: magnetization (between 0 and 1)
 func GetMag(state State) float64 {
 	N := len(state)
 	var sum int
@@ -122,6 +122,8 @@ func DistXY(loc1, loc2 Location, D int) (int, int) {
 }
 
 // PickMoveID picks a direct neighbor that the operational site wants to swap with
+// inputs: id0 = operational site id, kiez = neighborhood, D = size of full map
+// output: id of the picked neighbor
 func PickMoveID(id0 int, kiez State, D int) int {
 	site0 := kiez[id0]
 	// collect candidate IDs
