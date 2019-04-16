@@ -1,6 +1,6 @@
 suppressPackageStartupMessages(library(tidyverse))
 
-mode <- '0.2'
+mode <- '0.0'
 
 ## state history
 state_hist <-
@@ -39,6 +39,7 @@ ggsave(sprintf("temp_mag_%s.png", mode),
 temp_ener <-
   ggplot(macro_hist %>% filter(time == end_time, key == "ener")) +
   geom_point(aes(x = temp, y = value)) +
+  ylim(-2.2, 0) +
   labs(x = 'Temperature', y = 'Energy change')
 ggsave(sprintf("temp_ener_%s.png", mode),
        temp_ener, width = 12, height = 10, units = "cm")
