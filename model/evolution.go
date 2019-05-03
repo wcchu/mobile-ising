@@ -19,10 +19,9 @@ type SiteInfo struct {
 // State maps site ID to SiteInfo
 type State map[int]SiteInfo
 
-// Evolve runs the evolution of state in time from a random initial state Q times,
-// and
-// inputs: T = temperature, N = num of sites, L = max time steps
-// outputs: state history, magnetization history, energy shift history, time step reaching convergence
+// Evolve runs the evolution of state in time from a random initial state Q times
+// inputs: T = temperature, D = size of full map, L = max time steps, Q num of runs
+// outputs: state history of all runs, magnetization history averaged across runs, energy shift history averaged across runs
 func Evolve(T float64, D, L, Q int) ([][]State, []float64, []float64) {
 	// initialization
 	stateHist := make([][]State, Q)
@@ -55,7 +54,7 @@ func Evolve(T float64, D, L, Q int) ([][]State, []float64, []float64) {
 }
 
 // initState creates an initial state with random spins
-// D = dimension of map
+// D = size of map
 func initState(D int) State {
 	state := make(State)
 	var i int
@@ -71,7 +70,7 @@ func initState(D int) State {
 	return state
 }
 
-// AveRuns averages the values across runs
+// AveRuns averages the values across the 1st dimension for each 2nd dimension for a 2D array
 func AveRuns(h [][]float64) []float64 {
 	sumHist := make([]float64, len(h[0]))
 	// summation

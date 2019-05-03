@@ -1,4 +1,6 @@
 # Mobile Ising
-Ising model with movable sites in 2D space
+Ising model with movable sites in a 2D lattice
 
-Install console progress bar for Go: https://github.com/cheggaaa/pb
+We construct a extended Ising model to simulate the homogenization of social orientation on a 2D lattice system. In addition to flipping the spin of a site, we allow two directly neighboring elements to swap their locations while preserving their spins. This swapping is equivalent to flipping two neighboring sites at the same time and exchanging their identities used in the simulation. The purpose of this extended model is to imitate the dynamics of alignment/anti-alignment of social opinions/ideologies instead of a numeric presentation of ferromagnetism in material science.
+
+In social context, the two spins represent two ideologies, and the flipping and swapping represent an individual reducing tension against the neighbors by either flipping the ideology, or moving to a new location by swapping sites with a neighbor, respectively. The temperature controls how probable an individual can choose an ideology that is in conflict with its neighbors, or in other words, how tolerant this society is. The simplification of exactly two ideologies greatly reduces the complexity and computational expense, yet is still representative for societies that are highly polarized. To restrict the site mobility to only swapping with a neighbor is strategic but not a fundamental technical constraint, which could be lifted in future studies.
